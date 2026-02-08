@@ -144,3 +144,4 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - 2026-02-08: Created initial full project spec/todo tracker with completed and pending roadmap.
 - 2026-02-08: Added simple/elegant landing-page redesign updates (including font/palette/layout changes), recorded Playwright desktop+mobile validation, and marked typecheck/test quality gates complete.
 - 2026-02-08: Implemented OAuth adapter contract plus real Spotify/TIDAL auth start/callback flows with signed state/session cookies.
+- 2026-02-08: Stopped tracking generated TypeScript build artifacts (`*.tsbuildinfo`) to keep git status clean after local typecheck runs.
