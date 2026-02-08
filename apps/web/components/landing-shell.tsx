@@ -57,10 +57,11 @@ export function LandingShell(): ReactElement {
 
   async function submitInvite(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
+    const form = event.currentTarget;
     setInviteNotice(null);
     setBusyAction("invite");
 
-    const formData = new FormData(event.currentTarget);
+    const formData = new FormData(form);
     const honeypot = String(formData.get("company") || "");
 
     try {
@@ -89,7 +90,7 @@ export function LandingShell(): ReactElement {
         tone: "success",
         text: "Request received. Once allowlisted, return and use I'm Approved."
       });
-      event.currentTarget.reset();
+      form.reset();
     } catch {
       setInviteNotice({ tone: "warning", text: "Could not submit invite request." });
     } finally {
