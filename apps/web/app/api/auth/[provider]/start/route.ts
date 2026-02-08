@@ -1,7 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { requireApprovedEmail } from "@/lib/auth-gate";
-
-const supportedProviders = new Set(["spotify", "tidal"]);
+import { getOAuthStateSecret } from "@/lib/env";
+import {
+  createOAuthState,
+  createOAuthStateCookieValue,
+  getOAuthStateCookieMaxAge,
+  getOAuthStateCookieName
+} from "@/lib/oauth-state";
+import { getOAuthCallbackUrl, getOAuthProviderAdapter, isOAuthProvider } from "@/lib/providers";
 
 export async function GET(
   request: NextRequest,
@@ -13,13 +19,32 @@ export async function GET(
   }
 
   const { provider } = await context.params;
-  if (!supportedProviders.has(provider)) {
+  if (!isOAuthProvider(provider)) {
     return NextResponse.json({ error: "Unsupported provider." }, { status: 404 });
   }
 
-  return NextResponse.json({
-    provider,
-    ok: true,
-    message: "Approved. OAuth flow placeholder endpoint is ready."
-  });
+  const state = createOAuthState();
+  const redirectUri = getOAuthCallbackUrl(provider);
+
+  try {
+    const authorizationUrl = getOAuthProviderAdapter(provider).buildAuthorizationUrl({
+      state,
+      redirectUri
+    });
+
+    const response = NextResponse.redirect(authorizationUrl);
+    response.cookies.set({
+      name: getOAuthStateCookieName(provider),
+      value: createOAuthStateCookieValue(provider, approval.approvedEmail, state, getOAuthStateSecret()),
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: getOAuthStateCookieMaxAge()
+    });
+
+    return response;
+  } catch {
+    return NextResponse.json({ error: "OAuth provider is not configured." }, { status: 503 });
+  }
 }

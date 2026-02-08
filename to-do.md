@@ -19,7 +19,6 @@ Status: Active (private beta build)
 
 ### Out of scope (v1)
 - Persistent invite/transfer database.
-- Fully implemented Spotify OAuth and TIDAL OAuth.
 - Real playlist/liked-song transfer logic.
 - Automated allowlist updates in Spotify dashboard.
 
@@ -61,9 +60,11 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - `POST /api/invite/check`
   - Checks allowlist membership
   - Sets signed approval cookie for approved users
-- Guarded placeholders (403 until approved):
+- Guarded routes (403 until approved):
   - `GET /api/auth/[provider]/start`
   - `GET /api/auth/[provider]/callback`
+  - Auth endpoints now execute provider OAuth start/callback flows.
+  - Source/transfer endpoints remain placeholder responses:
   - `GET /api/source/playlists`
   - `GET /api/source/liked`
   - `POST /api/transfer/preview`
@@ -93,9 +94,9 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 
 ## 7) Pending work (priority order)
 ## P0 - Core functionality
-- [ ] Implement real Spotify OAuth start/callback flow.
-- [ ] Implement real TIDAL OAuth start/callback flow.
-- [ ] Add provider adapter contract package and concrete Spotify/TIDAL adapters.
+- [x] Implement real Spotify OAuth start/callback flow.
+- [x] Implement real TIDAL OAuth start/callback flow.
+- [x] Add provider adapter contract package and concrete Spotify/TIDAL adapters.
 - [ ] Implement transfer preview logic (playlist + liked songs inputs).
 - [ ] Implement transfer execution logic (chunked add, skip unmatched, result report).
 - [ ] Implement deterministic track matching (`ISRC` first, strict metadata fallback).
@@ -119,8 +120,8 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - [ ] Add support for additional destination providers via adapter pattern.
 
 ## 8) Quality gates
-- [ ] `pnpm typecheck` passes.
-- [ ] `pnpm test` passes.
+- [x] `pnpm typecheck` passes.
+- [x] `pnpm test` passes.
 - [ ] Manual flow check passes:
   - [ ] Invite request returns success.
   - [ ] Approved email enables connect flow.
@@ -138,3 +139,4 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 
 ## 10) Change log
 - 2026-02-08: Created initial full project spec/todo tracker with completed and pending roadmap.
+- 2026-02-08: Implemented OAuth adapter contract plus real Spotify/TIDAL auth start/callback flows with signed state/session cookies.

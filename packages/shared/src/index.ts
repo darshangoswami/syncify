@@ -33,3 +33,11 @@ export interface TransferChunkResult {
   skipped: number;
   unmatched: Array<{ trackId: string; reason: string }>;
 }
+
+export type {
+  OAuthProvider,
+  OAuthAuthorizationRequest,
+  OAuthTokenExchangeRequest,
+  OAuthTokenSet,
+  OAuthProviderAdapter
+} from "./provider-adapter";

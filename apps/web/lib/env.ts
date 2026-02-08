@@ -21,6 +21,21 @@ function asCsv(value: string | undefined): string[] {
     .filter(Boolean);
 }
 
+function asScopes(value: string | undefined, fallback: string[]): string[] {
+  if (!value) {
+    return fallback;
+  }
+
+  return value
+    .split(/[,\s]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function normalizeBaseUrl(value: string): string {
+  return value.endsWith("/") ? value.slice(0, -1) : value;
+}
+
 export function getRateLimitWindowSeconds(): number {
   return asNumber(process.env.INVITE_RATE_LIMIT_WINDOW, DEFAULT_RATE_WINDOW_SECONDS);
 }
@@ -60,4 +75,58 @@ export function getEmailProviderApiKey(): string {
 
 export function getEmailFrom(): string {
   return process.env.EMAIL_FROM || "Spotify XYZ <noreply@example.com>";
+}
+
+export function getAppBaseUrl(): string {
+  const configured = process.env.APP_BASE_URL || process.env.NEXT_PUBLIC_APP_BASE_URL;
+  if (configured) {
+    return normalizeBaseUrl(configured);
+  }
+
+  const vercelUrl = process.env.VERCEL_URL;
+  if (vercelUrl) {
+    return normalizeBaseUrl(`https://${vercelUrl}`);
+  }
+
+  return "http://localhost:3000";
+}
+
+export function getOAuthStateSecret(): string {
+  return process.env.OAUTH_STATE_SECRET || getApprovalCookieSecret();
+}
+
+export function getOAuthSessionSecret(): string {
+  return process.env.OAUTH_SESSION_SECRET || getApprovalCookieSecret();
+}
+
+export interface ProviderOAuthConfig {
+  clientId: string;
+  clientSecret: string;
+  authorizationUrl: string;
+  tokenUrl: string;
+  scopes: string[];
+}
+
+export function getSpotifyOAuthConfig(): ProviderOAuthConfig {
+  return {
+    clientId: process.env.SPOTIFY_CLIENT_ID || "",
+    clientSecret: process.env.SPOTIFY_CLIENT_SECRET || "",
+    authorizationUrl: process.env.SPOTIFY_AUTHORIZATION_URL || "https://accounts.spotify.com/authorize",
+    tokenUrl: process.env.SPOTIFY_TOKEN_URL || "https://accounts.spotify.com/api/token",
+    scopes: asScopes(process.env.SPOTIFY_SCOPES, [
+      "playlist-read-private",
+      "playlist-read-collaborative",
+      "user-library-read"
+    ])
+  };
+}
+
+export function getTidalOAuthConfig(): ProviderOAuthConfig {
+  return {
+    clientId: process.env.TIDAL_CLIENT_ID || "",
+    clientSecret: process.env.TIDAL_CLIENT_SECRET || "",
+    authorizationUrl: process.env.TIDAL_AUTHORIZATION_URL || "https://auth.tidal.com/v1/oauth2/authorize",
+    tokenUrl: process.env.TIDAL_TOKEN_URL || "https://auth.tidal.com/v1/oauth2/token",
+    scopes: asScopes(process.env.TIDAL_SCOPES, ["playlist.read", "playlist.write", "collection.read"])
+  };
 }
