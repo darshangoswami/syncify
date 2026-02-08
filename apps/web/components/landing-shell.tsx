@@ -144,35 +144,27 @@ export function LandingShell(): ReactElement {
   return (
     <main className="studio-shell">
       <motion.section className="masthead" {...getReveal(0, shouldReduceMotion)}>
-        <p className="beta-pill">Private Beta</p>
-        <h1>Transfer Playlists Across Services</h1>
+        <p className="beta-pill">Private Access</p>
+        <h1>Move playlists with a controlled onboarding flow.</h1>
         <p className="lead-copy">
-          Clean manual onboarding for Spotify dev mode. Submit your email, get approved, then continue to
-          connection.
+          Request access, wait for manual approval, then connect Spotify when your email is allowlisted.
         </p>
         <div className="policy-tags">
-          <span>Manual allowlist review</span>
-          <span>No persistent user DB</span>
+          <span>Manual access review</span>
+          <span>No persistent user database</span>
           <span>Least-privilege OAuth</span>
         </div>
       </motion.section>
 
       <section className="device-grid">
         <motion.article className="phone-card" {...getReveal(1, shouldReduceMotion)}>
-          <header className="phone-topbar">
-            <span className="avatar-dot" aria-hidden="true" />
-            <p>Invite Queue</p>
-            <span className="status-orb" aria-hidden="true" />
+          <header className="panel-head">
+            <p className="panel-kicker">Step 1</p>
+            <span className="panel-dot" aria-hidden="true" />
           </header>
 
-          <div className="art-card" aria-hidden="true">
-            <div className="shape shape-a" />
-            <div className="shape shape-b" />
-            <div className="shape shape-c" />
-          </div>
-
           <h2>Request Invite</h2>
-          <p className="section-copy">Add your email to request manual allowlisting.</p>
+          <p className="section-copy">Submit the email you want allowlisted for Spotify connection access.</p>
 
           <form onSubmit={submitInvite} className="form-stack">
             <label htmlFor="invite-email">Email</label>
@@ -210,24 +202,13 @@ export function LandingShell(): ReactElement {
         </motion.article>
 
         <motion.article className="phone-card" {...getReveal(2, shouldReduceMotion)}>
-          <header className="phone-topbar">
-            <span className="ghost-chevron" aria-hidden="true">
-              &#8249;
-            </span>
-            <p>Approval Check</p>
-            <span className="menu-dots" aria-hidden="true">
-              &#8942;
-            </span>
+          <header className="panel-head">
+            <p className="panel-kicker">Step 2</p>
+            <span className={`panel-badge ${isApproved ? "ok" : "locked"}`}>{isApproved ? "Approved" : "Locked"}</span>
           </header>
 
-          <div className="list-preview" aria-hidden="true">
-            <div className="preview-row" />
-            <div className="preview-row" />
-            <div className="preview-row" />
-          </div>
-
-          <h2>I&apos;m Approved</h2>
-          <p className="section-copy">OAuth and transfer routes stay locked until approval is verified.</p>
+          <h2>Verify Approval</h2>
+          <p className="section-copy">OAuth and transfer routes stay unavailable until approval is confirmed.</p>
 
           <form onSubmit={verifyApproval} className="form-stack">
             <label htmlFor="approved-email">Approved Email</label>
@@ -263,14 +244,14 @@ export function LandingShell(): ReactElement {
             whileHover={isApproved ? hoverLift : undefined}
             whileTap={isApproved ? tapShrink : undefined}
           >
-            Start Spotify Connection
+            Connect Spotify
           </motion.a>
         </motion.article>
       </section>
 
       <motion.footer className="future-note" {...getReveal(3, shouldReduceMotion)}>
-        <p className="future-eyebrow">Next Iteration</p>
-        <p>AI workflow placeholder: collect invite emails and prepare approval batches for manual review.</p>
+        <p className="future-eyebrow">Operational Note</p>
+        <p>Invite approvals are reviewed manually in batches before OAuth is unlocked.</p>
       </motion.footer>
     </main>
   );

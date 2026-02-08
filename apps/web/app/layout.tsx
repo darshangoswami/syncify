@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import type { ReactElement, ReactNode } from "react";
-import { Manrope, Outfit } from "next/font/google";
+import { Sora, Source_Sans_3 } from "next/font/google";
 import "@/app/globals.css";
 
-const display = Outfit({
+const display = Sora({
   subsets: ["latin"],
   weight: ["500", "600", "700"],
   variable: "--font-display"
 });
 
-const body = Manrope({
+const body = Source_Sans_3({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-body"

@@ -84,6 +84,9 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - [x] UI redesign iterations completed:
   - [x] cleaner typography and cleaner surfaces
   - [x] motion.dev (`motion/react`) animation integration
+  - [x] simple/elegant banking-style pass inspired by Rebank (clean two-step panels, restrained cobalt accents, softer shadows)
+  - [x] font refresh to `Sora` (display) + `Source Sans 3` (body)
+  - [x] Playwright-driven visual iteration loop (desktop + mobile screenshot validation)
 - [x] Upgraded to latest stable Next.js at time of upgrade:
   - [x] `next@16.1.6`
   - [x] aligned React and types versions
@@ -119,8 +122,8 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - [ ] Add support for additional destination providers via adapter pattern.
 
 ## 8) Quality gates
-- [ ] `pnpm typecheck` passes.
-- [ ] `pnpm test` passes.
+- [x] `pnpm typecheck` passes.
+- [x] `pnpm test` passes.
 - [ ] Manual flow check passes:
   - [ ] Invite request returns success.
   - [ ] Approved email enables connect flow.
@@ -138,3 +141,4 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 
 ## 10) Change log
 - 2026-02-08: Created initial full project spec/todo tracker with completed and pending roadmap.
+- 2026-02-08: Added simple/elegant landing-page redesign updates (including font/palette/layout changes), recorded Playwright desktop+mobile validation, and marked typecheck/test quality gates complete.
