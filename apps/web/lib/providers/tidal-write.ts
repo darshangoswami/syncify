@@ -15,12 +15,38 @@ function getAuthHeader(session: ProviderSession): string {
   return `${session.tokenType || "Bearer"} ${session.accessToken}`;
 }
 
+async function getTidalUserId(session: ProviderSession): Promise<string> {
+  const config = getTidalApiConfig();
+  const response = await fetch(`${config.apiBaseUrl}/users/me`, {
+    headers: { Authorization: getAuthHeader(session) }
+  });
+
+  if (!response.ok) {
+    throw new TidalWriteError(
+      `Failed to get TIDAL user: ${response.status}`,
+      response.status
+    );
+  }
+
+  const payload = (await response.json()) as {
+    data?: { id?: string };
+    id?: string;
+  };
+
+  const userId = payload.data?.id || payload.id;
+  if (!userId) {
+    throw new TidalWriteError("TIDAL user ID not found.", 502);
+  }
+
+  return String(userId);
+}
+
 export async function createTidalPlaylist(
   session: ProviderSession,
   name: string
 ): Promise<string> {
   const config = getTidalApiConfig();
-  const url = `${config.apiBaseUrl}/playlists`;
+  const url = `${config.apiBaseUrl}/playlists?countryCode=${config.countryCode}`;
 
   const response = await fetch(url, {
     method: "POST",
@@ -32,16 +58,18 @@ export async function createTidalPlaylist(
       data: {
         type: "playlists",
         attributes: {
-          title: name,
-          description: `Transferred from Spotify via syncify`
+          name,
+          description: "Transferred from Spotify via syncify"
         }
       }
     })
   });
 
   if (!response.ok) {
+    let body = "";
+    try { body = await response.text(); } catch { /* ignore */ }
     throw new TidalWriteError(
-      `Failed to create TIDAL playlist: ${response.status}`,
+      `Failed to create TIDAL playlist: ${response.status} ${body}`,
       response.status
     );
   }
@@ -89,8 +117,10 @@ export async function addTracksToTidalPlaylist(
     if (response.status === 429) {
       throw new TidalWriteError("TIDAL rate limit exceeded.", 429);
     }
+    let body = "";
+    try { body = await response.text(); } catch { /* ignore */ }
     throw new TidalWriteError(
-      `Failed to add tracks to TIDAL playlist: ${response.status}`,
+      `Failed to add tracks to TIDAL playlist: ${response.status} ${body}`,
       response.status
     );
   }
@@ -103,7 +133,8 @@ export async function addTrackToTidalFavorites(
   trackId: string
 ): Promise<boolean> {
   const config = getTidalApiConfig();
-  const url = `${config.apiBaseUrl}/favorites/tracks`;
+  const userId = await getTidalUserId(session);
+  const url = `${config.apiBaseUrl}/userCollections/${userId}/relationships/tracks`;
 
   const response = await fetch(url, {
     method: "POST",
@@ -121,7 +152,6 @@ export async function addTrackToTidalFavorites(
       throw new TidalWriteError("TIDAL rate limit exceeded.", 429);
     }
     if (response.status === 409) {
-      // Track already in favorites — treat as success
       return true;
     }
     throw new TidalWriteError(

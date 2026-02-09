@@ -157,6 +157,10 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
     - [x] Extract artist names from JSON:API `relationships` (not `attributes`)
     - [x] Handle numeric track IDs from JSON:API compound documents
     - [x] Prefer `included` array over `data` for full track resources with attributes
+  - [x] Fixed TIDAL write API integration:
+    - [x] Corrected playlist creation attribute from `title` to `name` per TIDAL API spec
+    - [x] Fixed favorites endpoint to use `/userCollections/{userId}/relationships/tracks` with `GET /users/me` lookup
+    - [x] Reduced chunk size from 25 to 20 (TIDAL max per batch request)
 
 ## 7) Pending work (priority order)
 ## P0 - Core functionality
@@ -219,3 +223,4 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - 2026-02-10: Wired select-sources page to real Spotify API: fetches all user playlists + liked songs count, removed mock data and syncing animation, added loading/error states.
 - 2026-02-09: Transfer execution feature: enhanced preview with per-playlist breakdowns + matched TIDAL track IDs, created TIDAL write functions (playlist creation, track adding, favorites), implemented real chunk endpoint, built `/transfer` page with three-phase UI (preview summary, live progress with circular indicator, results with stats grid and unmatched text box + copy), added TIDAL write scopes, wired select-sources transfer button, added error handling (session expiry, rate limit retry, cancellation).
 - 2026-02-09: Fixed TIDAL search API integration: corrected endpoint path (`searchResults` camelCase + `/relationships/tracks`), added request throttling (250ms) and exponential backoff retry for 429 rate limits, parsed ISO 8601 durations, extracted artist names from JSON:API relationships, handled numeric IDs and compound document `included` array. Improved match rate from ~16% to ~82%.
+- 2026-02-09: Fixed TIDAL write API: corrected playlist creation attribute (`name` not `title`), fixed favorites to use `/userCollections/{userId}/relationships/tracks` with `/users/me` lookup, reduced chunk size from 25 to 20 to match TIDAL batch limit. Transfer now completes successfully end-to-end.
