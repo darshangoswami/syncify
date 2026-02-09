@@ -155,7 +155,7 @@ export function getTidalApiConfig(): ProviderApiConfig & {
 
   return {
     apiBaseUrl,
-    searchUrlTemplate: process.env.TIDAL_SEARCH_URL_TEMPLATE || `${apiBaseUrl}/searchresults/{query}`,
+    searchUrlTemplate: process.env.TIDAL_SEARCH_URL_TEMPLATE || `${apiBaseUrl}/searchResults/{query}/relationships/tracks`,
     countryCode: (process.env.TIDAL_COUNTRY_CODE || "US").trim().toUpperCase()
   };
 }

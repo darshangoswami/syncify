@@ -150,6 +150,13 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
   - [x] Wired select-sources "Transfer to TIDAL" button to navigate to `/transfer` with selected playlists
   - [x] Error handling: 401 session expiry, 429 rate limit retry with exponential backoff, per-track failure recording
   - [x] Cancellation support: "Stop Transfer" preserves partial results
+  - [x] Fixed TIDAL search API integration (correct endpoint, rate limiting, response parsing):
+    - [x] Corrected search endpoint to `openapi.tidal.com/v2/searchResults/{query}/relationships/tracks`
+    - [x] Added 250ms throttle + exponential backoff retry (up to 4 retries) for 429 rate limits
+    - [x] Parse ISO 8601 duration format (`PT3M38S`) from TIDAL API responses
+    - [x] Extract artist names from JSON:API `relationships` (not `attributes`)
+    - [x] Handle numeric track IDs from JSON:API compound documents
+    - [x] Prefer `included` array over `data` for full track resources with attributes
 
 ## 7) Pending work (priority order)
 ## P0 - Core functionality
@@ -211,3 +218,4 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - 2026-02-10: Full UI redesign from design mockups: replaced single-page custom CSS UI with multi-page Tailwind CSS app (landing, request-invite, connections, select-sources), added `/api/status` endpoint, switched to Plus Jakarta Sans + Material Icons, updated OAuth callback redirect to `/connections`.
 - 2026-02-10: Wired select-sources page to real Spotify API: fetches all user playlists + liked songs count, removed mock data and syncing animation, added loading/error states.
 - 2026-02-09: Transfer execution feature: enhanced preview with per-playlist breakdowns + matched TIDAL track IDs, created TIDAL write functions (playlist creation, track adding, favorites), implemented real chunk endpoint, built `/transfer` page with three-phase UI (preview summary, live progress with circular indicator, results with stats grid and unmatched text box + copy), added TIDAL write scopes, wired select-sources transfer button, added error handling (session expiry, rate limit retry, cancellation).
+- 2026-02-09: Fixed TIDAL search API integration: corrected endpoint path (`searchResults` camelCase + `/relationships/tracks`), added request throttling (250ms) and exponential backoff retry for 429 rate limits, parsed ISO 8601 durations, extracted artist names from JSON:API relationships, handled numeric IDs and compound document `included` array. Improved match rate from ~16% to ~82%.
