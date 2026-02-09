@@ -86,6 +86,7 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
   - [x] cleaner typography and cleaner surfaces
   - [x] motion.dev (`motion/react`) animation integration
   - [x] simple/elegant banking-style pass inspired by Rebank (clean two-step panels, restrained cobalt accents, softer shadows)
+  - [x] dark theme redesign inspired by Rebank fintech aesthetic (deep `#07080d` background, purple `#7c6bf5` accents, glassmorphic cards, gradient typography, hero glow, sticky frosted nav bar)
   - [x] font refresh to `Sora` (display) + `Source Sans 3` (body)
   - [x] Playwright-driven visual iteration loop (desktop + mobile screenshot validation)
 - [x] Upgraded to latest stable Next.js at time of upgrade:
@@ -145,3 +146,4 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - 2026-02-08: Added simple/elegant landing-page redesign updates (including font/palette/layout changes), recorded Playwright desktop+mobile validation, and marked typecheck/test quality gates complete.
 - 2026-02-08: Implemented OAuth adapter contract plus real Spotify/TIDAL auth start/callback flows with signed state/session cookies.
 - 2026-02-08: Stopped tracking generated TypeScript build artifacts (`*.tsbuildinfo`) to keep git status clean after local typecheck runs.
+- 2026-02-08: Dark theme redesign of landing page inspired by Rebank (PR #3 on `claude/work` branch): replaced light theme with dark UI, added sticky nav, hero glow, glassmorphic cards, purple accent system, and gradient typography via 5-iteration Playwright loop.
