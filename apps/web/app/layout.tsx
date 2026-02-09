@@ -1,23 +1,18 @@
 import type { Metadata } from "next";
 import type { ReactElement, ReactNode } from "react";
-import { Sora, Source_Sans_3 } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
+import { CanonicalHostGuard } from "@/components/canonical-host-guard";
 import "@/app/globals.css";
 
-const display = Sora({
+const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  variable: "--font-display"
-});
-
-const body = Source_Sans_3({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-body"
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-sans",
 });
 
 export const metadata: Metadata = {
-  title: "Spotify XYZ Invite",
-  description: "Private beta transfer app: request invite and get approved before OAuth."
+  title: "syncify",
+  description: "Transfer your music library between providers."
 };
 
 export default function RootLayout({
@@ -26,8 +21,17 @@ export default function RootLayout({
   children: ReactNode;
 }>): ReactElement {
   return (
-    <html lang="en">
-      <body className={`${display.variable} ${body.variable}`}>{children}</body>
+    <html lang="en" className="dark">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/icon?family=Material+Icons+Round"
+          rel="stylesheet"
+        />
+      </head>
+      <body className={`${plusJakarta.variable} font-sans bg-background-dark text-white antialiased min-h-screen`}>
+        <CanonicalHostGuard />
+        {children}
+      </body>
     </html>
   );
 }
