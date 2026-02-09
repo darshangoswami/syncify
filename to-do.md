@@ -1,6 +1,6 @@
 # Spotify XYZ Project Spec and TODO
 
-Last updated: 2026-02-08
+Last updated: 2026-02-09
 Owner: Dexter
 Status: Active (private beta build)
 
@@ -41,6 +41,9 @@ Status: Active (private beta build)
 ## 4) Environment contract
 From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - `APPROVAL_COOKIE_SECRET`
+- `OAUTH_STATE_SECRET`
+- `OAUTH_SESSION_SECRET`
+- `APP_BASE_URL`
 - `INVITE_ADMIN_EMAIL`
 - `EMAIL_PROVIDER` (`mock` | `resend` | `postmark`)
 - `EMAIL_PROVIDER_API_KEY`
@@ -50,6 +53,20 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - `INVITE_RATE_LIMIT_MAX`
 - `INVITE_BLOCKED_DOMAINS`
 - `INVITE_GATE_PASSPHRASE` (reserved for future use)
+- `SPOTIFY_CLIENT_ID`
+- `SPOTIFY_CLIENT_SECRET`
+- `SPOTIFY_SCOPES`
+- `SPOTIFY_AUTHORIZATION_URL`
+- `SPOTIFY_TOKEN_URL`
+- `SPOTIFY_API_BASE_URL`
+- `TIDAL_CLIENT_ID`
+- `TIDAL_CLIENT_SECRET`
+- `TIDAL_SCOPES`
+- `TIDAL_AUTHORIZATION_URL`
+- `TIDAL_TOKEN_URL`
+- `TIDAL_API_BASE_URL`
+- `TIDAL_SEARCH_URL_TEMPLATE`
+- `TIDAL_COUNTRY_CODE`
 
 ## 5) API surface (current)
 - `POST /api/invite/request`
@@ -64,10 +81,12 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
   - `GET /api/auth/[provider]/start`
   - `GET /api/auth/[provider]/callback`
   - Auth endpoints now execute provider OAuth start/callback flows.
-  - Source/transfer endpoints remain placeholder responses:
   - `GET /api/source/playlists`
   - `GET /api/source/liked`
+  - Source endpoints now return Spotify data for approved users with valid provider sessions.
   - `POST /api/transfer/preview`
+  - Preview endpoint now runs Spotify-source to TIDAL-destination deterministic matching.
+  - Remaining placeholder responses:
   - `POST /api/transfer/chunk`
   - `POST /api/transfer/finalize`
 
@@ -95,15 +114,16 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - [x] Fixed invite UI false-error bug (React event target lifecycle issue in async submit handler).
 - [x] Test coverage for key invite/approval behavior.
 - [x] `pnpm typecheck` and `pnpm test` passing.
+- [x] Transfer preview backend slice (Spotify source reads + TIDAL destination matching with deterministic rules).
 
 ## 7) Pending work (priority order)
 ## P0 - Core functionality
 - [x] Implement real Spotify OAuth start/callback flow.
 - [x] Implement real TIDAL OAuth start/callback flow.
 - [x] Add provider adapter contract package and concrete Spotify/TIDAL adapters.
-- [ ] Implement transfer preview logic (playlist + liked songs inputs).
+- [x] Implement transfer preview logic (playlist + liked songs inputs).
 - [ ] Implement transfer execution logic (chunked add, skip unmatched, result report).
-- [ ] Implement deterministic track matching (`ISRC` first, strict metadata fallback).
+- [x] Implement deterministic track matching (`ISRC` first, strict metadata fallback).
 
 ## P1 - Reliability and UX
 - [ ] Add robust API error taxonomy for provider failures/rate limits/token refresh.
@@ -126,11 +146,11 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 ## 8) Quality gates
 - [x] `pnpm typecheck` passes.
 - [x] `pnpm test` passes.
-- [ ] Manual flow check passes:
-  - [ ] Invite request returns success.
-  - [ ] Approved email enables connect flow.
-  - [ ] Unapproved email remains blocked.
-  - [ ] Guarded route returns 403 before approval, 200 after approval.
+- [x] Manual flow check passes:
+  - [x] Invite request returns success.
+  - [x] Approved email enables connect flow.
+  - [x] Unapproved email remains blocked.
+  - [x] Guarded route returns 403 before approval, 200 after approval.
 
 ## 9) How to maintain this file
 - This file is the source-of-truth task tracker.
@@ -147,3 +167,5 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - 2026-02-08: Implemented OAuth adapter contract plus real Spotify/TIDAL auth start/callback flows with signed state/session cookies.
 - 2026-02-08: Stopped tracking generated TypeScript build artifacts (`*.tsbuildinfo`) to keep git status clean after local typecheck runs.
 - 2026-02-08: Dark theme redesign of landing page inspired by Rebank (PR #3 on `claude/work` branch): replaced light theme with dark UI, added sticky nav, hero glow, glassmorphic cards, purple accent system, and gradient typography via 5-iteration Playwright loop.
+- 2026-02-09: Completed manual quality-gate flow checks for invite success, approval gating, and guarded route 403/200 behavior.
+- 2026-02-09: Implemented transfer preview backend slice with Spotify source reads, TIDAL destination matching, provider-session gating, and new route + matcher tests.

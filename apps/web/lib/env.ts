@@ -107,6 +107,10 @@ export interface ProviderOAuthConfig {
   scopes: string[];
 }
 
+export interface ProviderApiConfig {
+  apiBaseUrl: string;
+}
+
 export function getSpotifyOAuthConfig(): ProviderOAuthConfig {
   return {
     clientId: process.env.SPOTIFY_CLIENT_ID || "",
@@ -128,5 +132,24 @@ export function getTidalOAuthConfig(): ProviderOAuthConfig {
     authorizationUrl: process.env.TIDAL_AUTHORIZATION_URL || "https://auth.tidal.com/v1/oauth2/authorize",
     tokenUrl: process.env.TIDAL_TOKEN_URL || "https://auth.tidal.com/v1/oauth2/token",
     scopes: asScopes(process.env.TIDAL_SCOPES, ["playlist.read", "playlist.write", "collection.read"])
+  };
+}
+
+export function getSpotifyApiConfig(): ProviderApiConfig {
+  return {
+    apiBaseUrl: normalizeBaseUrl(process.env.SPOTIFY_API_BASE_URL || "https://api.spotify.com/v1")
+  };
+}
+
+export function getTidalApiConfig(): ProviderApiConfig & {
+  searchUrlTemplate: string;
+  countryCode: string;
+} {
+  const apiBaseUrl = normalizeBaseUrl(process.env.TIDAL_API_BASE_URL || "https://openapi.tidal.com/v2");
+
+  return {
+    apiBaseUrl,
+    searchUrlTemplate: process.env.TIDAL_SEARCH_URL_TEMPLATE || `${apiBaseUrl}/searchresults/{query}`,
+    countryCode: (process.env.TIDAL_COUNTRY_CODE || "US").trim().toUpperCase()
   };
 }
