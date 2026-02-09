@@ -1,33 +1,67 @@
 "use client";
 
+import type { SourcePlaylist } from "@spotify-xyz/shared";
 import type { ReactElement } from "react";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 
-interface MockPlaylist {
-  id: string;
-  name: string;
-  trackCount: number;
+interface PlaylistItem extends SourcePlaylist {
   type: "liked" | "playlist";
 }
 
-const MOCK_PLAYLISTS: MockPlaylist[] = [
-  { id: "liked", name: "Liked Songs", trackCount: 1248, type: "liked" },
-  { id: "1", name: "Lofi Beats to Move to", trackCount: 45, type: "playlist" },
-  { id: "2", name: "Late Night Jazz", trackCount: 22, type: "playlist" },
-  { id: "3", name: "Driving Music 2024", trackCount: 112, type: "playlist" },
-  { id: "4", name: "Techno Bunker", trackCount: 89, type: "playlist" },
-];
-
 export default function SelectSourcesPage(): ReactElement {
+  const [playlists, setPlaylists] = useState<PlaylistItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set(["liked", "2", "4"]));
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
-  const filtered = MOCK_PLAYLISTS.filter((p) =>
+  const fetchPlaylists = useCallback(async () => {
+    try {
+      const [playlistsRes, likedRes] = await Promise.all([
+        fetch("/api/source/playlists"),
+        fetch("/api/source/liked")
+      ]);
+
+      if (!playlistsRes.ok || !likedRes.ok) {
+        setError("Failed to load your library. Make sure both providers are connected.");
+        return;
+      }
+
+      const playlistsData = (await playlistsRes.json()) as { playlists: SourcePlaylist[] };
+      const likedData = (await likedRes.json()) as { tracks: unknown[] };
+
+      const items: PlaylistItem[] = [
+        {
+          id: "liked",
+          name: "Liked Songs",
+          trackCount: likedData.tracks.length,
+          type: "liked"
+        },
+        ...playlistsData.playlists.map((p) => ({
+          ...p,
+          type: "playlist" as const
+        }))
+      ];
+
+      setPlaylists(items);
+      setSelectedIds(new Set(items.map((p) => p.id)));
+    } catch {
+      setError("Failed to load your library.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchPlaylists();
+  }, [fetchPlaylists]);
+
+  const filtered = playlists.filter((p) =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const allSelected = filtered.every((p) => selectedIds.has(p.id));
+  const allSelected = filtered.length > 0 && filtered.every((p) => selectedIds.has(p.id));
 
   function toggleSelect(id: string): void {
     setSelectedIds((prev) => {
@@ -48,6 +82,42 @@ export default function SelectSourcesPage(): ReactElement {
       setSelectedIds(new Set(filtered.map((p) => p.id)));
     }
   }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="relative w-[375px] min-h-[812px] bg-background-dark flex flex-col items-center justify-center">
+          <div className="relative w-12 h-12 mb-4">
+            <div className="absolute inset-0 border-4 border-dashed border-primary rounded-full animate-spin" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="material-icons-round text-primary">sync</span>
+            </div>
+          </div>
+          <p className="text-zinc-500 text-sm font-bold">Loading your library...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="relative w-[375px] min-h-[812px] bg-background-dark flex flex-col items-center justify-center px-8 text-center">
+          <span className="material-icons-round text-red-500 text-5xl mb-4">error_outline</span>
+          <p className="text-white font-bold text-lg mb-2">Something went wrong</p>
+          <p className="text-zinc-400 text-sm mb-6">{error}</p>
+          <Link
+            href="/connections"
+            className="bg-zinc-800 text-white font-bold py-3 px-6 rounded-2xl transition-all active:scale-95"
+          >
+            Go Back
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const likedItem = filtered.find((p) => p.type === "liked");
 
   return (
     <div className="flex justify-center items-center min-h-screen">
@@ -107,7 +177,7 @@ export default function SelectSourcesPage(): ReactElement {
         {/* Playlist List */}
         <div className="flex-1 overflow-y-auto px-6 pb-24 custom-scrollbar space-y-4">
           {/* Featured: Liked Songs */}
-          {filtered.find((p) => p.type === "liked") && (
+          {likedItem && (
             <button
               className="w-full text-left relative overflow-hidden p-5 bg-gradient-to-br from-indigo-600 to-accent-blue rounded-3xl transition-transform active:scale-95 cursor-pointer"
               onClick={() => toggleSelect("liked")}
@@ -118,7 +188,9 @@ export default function SelectSourcesPage(): ReactElement {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-white font-bold text-lg">Liked Songs</h3>
-                  <p className="text-indigo-100 text-sm">1,248 tracks &bull; Saved</p>
+                  <p className="text-indigo-100 text-sm">
+                    {likedItem.trackCount.toLocaleString()} tracks &bull; Saved
+                  </p>
                 </div>
                 <div
                   className={`w-6 h-6 rounded-full border-2 ${
@@ -187,17 +259,6 @@ export default function SelectSourcesPage(): ReactElement {
                   </button>
                 );
               })}
-
-            {/* Syncing indicator */}
-            <div className="py-8 flex flex-col items-center justify-center opacity-40">
-              <div className="relative w-12 h-12 mb-4">
-                <div className="absolute inset-0 border-4 border-dashed border-primary rounded-full animate-spin" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="material-icons-round text-primary">sync</span>
-                </div>
-              </div>
-              <p className="text-xs font-bold text-zinc-500">Syncing more playlists...</p>
-            </div>
           </div>
         </div>
 
