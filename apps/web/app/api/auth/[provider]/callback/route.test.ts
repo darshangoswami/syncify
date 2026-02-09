@@ -87,7 +87,7 @@ describe("GET /api/auth/[provider]/callback", () => {
     });
 
     expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe("http://localhost/");
+    expect(response.headers.get("location")).toBe("http://localhost/connections");
 
     const sessionCookie = response.cookies.get(getProviderSessionCookieName("spotify"));
     expect(sessionCookie?.value).toBeTruthy();

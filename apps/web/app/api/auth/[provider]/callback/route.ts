@@ -65,7 +65,7 @@ export async function GET(
     });
     const session = createProviderSession(provider, tokenSet);
 
-    const response = NextResponse.redirect(new URL("/", request.nextUrl.origin));
+    const response = NextResponse.redirect(new URL("/connections", request.nextUrl.origin));
     response.cookies.set({
       name: getProviderSessionCookieName(provider),
       value: createProviderSessionCookieValue(session, getOAuthSessionSecret()),

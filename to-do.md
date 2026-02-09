@@ -1,6 +1,6 @@
 # Spotify XYZ Project Spec and TODO
 
-Last updated: 2026-02-09
+Last updated: 2026-02-10
 Owner: Dexter
 Status: Active (private beta build)
 
@@ -91,6 +91,8 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
   - Remaining placeholder responses:
   - `POST /api/transfer/chunk`
   - `POST /api/transfer/finalize`
+- `GET /api/status`
+  - Returns `{ approved, spotifyConnected, tidalConnected }` based on signed cookies
 
 ## 6) Completed so far
 - [x] Initial monorepo scaffold (`apps/web`, `packages/shared`, turbo/pnpm config).
@@ -123,6 +125,17 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
   - [x] updated TIDAL OAuth defaults/scopes to current-compatible values (`login.tidal.com/authorize`, read-focused scopes)
 - [x] Approval step UI now includes provider-specific connect CTAs (`Connect Spotify`, `Connect TIDAL`).
 - [x] Resolved hydration mismatch in connect CTA by keeping SSR/CSR `href` stable.
+- [x] Full UI redesign from design mockups (Tailwind CSS + Plus Jakarta Sans + Material Icons):
+  - [x] Multi-page routing: `/` (landing), `/request-invite`, `/connections`, `/select-sources`
+  - [x] Public landing access gate with "syncify" branding, request invite CTA, already approved CTA
+  - [x] Request invite flow page with email form, success state, and back navigation
+  - [x] Provider connections page with approval check, Spotify/TIDAL OAuth cards, connected states
+  - [x] Select music sources page (UI shell with mock playlist data, checkboxes, search)
+  - [x] `GET /api/status` endpoint for checking approval + provider connection status
+  - [x] OAuth callback now redirects to `/connections` instead of `/`
+  - [x] Replaced custom CSS with Tailwind CSS v4 (`@tailwindcss/postcss`)
+  - [x] Switched fonts from Sora/Source Sans 3 to Plus Jakarta Sans
+  - [x] Localhost canonicalization extracted to shared `CanonicalHostGuard` component
 
 ## 7) Pending work (priority order)
 ## P0 - Core functionality
@@ -181,3 +194,4 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - 2026-02-09: Added dual provider connect CTAs on landing (`Connect Spotify` + `Connect TIDAL`) and fixed connect-link hydration mismatch.
 - 2026-02-09: Hardened local OAuth host behavior by canonicalizing callback origin for Spotify/TIDAL compatibility with provider redirect constraints.
 - 2026-02-09: Updated TIDAL OAuth integration to use PKCE and current authorization defaults/scopes, resolving login/authorization flow issues.
+- 2026-02-10: Full UI redesign from design mockups: replaced single-page custom CSS UI with multi-page Tailwind CSS app (landing, request-invite, connections, select-sources), added `/api/status` endpoint, switched to Plus Jakarta Sans + Material Icons, updated OAuth callback redirect to `/connections`.
