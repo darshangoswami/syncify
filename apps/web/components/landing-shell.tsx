@@ -1,7 +1,7 @@
 "use client";
 
 import type { FormEvent, ReactElement } from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 type NoticeTone = "success" | "warning" | "neutral";
@@ -53,7 +53,33 @@ export function LandingShell(): ReactElement {
   const [approvalNotice, setApprovalNotice] = useState<{ tone: NoticeTone; text: string } | null>(null);
   const [isApproved, setIsApproved] = useState(false);
 
-  const connectHref = useMemo(() => "/api/auth/spotify/start", []);
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const { hostname } = window.location;
+    if (hostname !== "localhost" && hostname !== "[::1]") {
+      return;
+    }
+
+    const url = new URL(window.location.href);
+    url.hostname = "127.0.0.1";
+    window.location.replace(url.toString());
+  }, []);
+
+  const connectHref = useMemo(() => {
+    if (typeof window === "undefined") {
+      return "/api/auth/spotify/start";
+    }
+
+    const url = new URL("/api/auth/spotify/start", window.location.origin);
+    if (url.hostname === "localhost" || url.hostname === "[::1]") {
+      url.hostname = "127.0.0.1";
+    }
+
+    return url.toString();
+  }, []);
 
   async function submitInvite(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
