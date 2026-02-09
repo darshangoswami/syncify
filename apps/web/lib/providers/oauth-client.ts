@@ -37,17 +37,23 @@ function asExpiresIn(value: unknown): number {
 export async function exchangeAuthorizationCode(input: {
   tokenUrl: string;
   clientId: string;
-  clientSecret: string;
+  clientSecret?: string;
   code: string;
   redirectUri: string;
+  codeVerifier?: string;
 }): Promise<OAuthTokenSet> {
   const body = new URLSearchParams({
     grant_type: "authorization_code",
     code: input.code,
     redirect_uri: input.redirectUri,
-    client_id: input.clientId,
-    client_secret: input.clientSecret
+    client_id: input.clientId
   });
+  if (input.clientSecret) {
+    body.set("client_secret", input.clientSecret);
+  }
+  if (input.codeVerifier) {
+    body.set("code_verifier", input.codeVerifier);
+  }
 
   const response = await fetch(input.tokenUrl, {
     method: "POST",

@@ -22,6 +22,9 @@ describe("GET /api/auth/[provider]/start", () => {
     process.env.APP_BASE_URL = "http://localhost:3000";
     process.env.SPOTIFY_CLIENT_ID = "spotify-client-id";
     process.env.SPOTIFY_CLIENT_SECRET = "spotify-client-secret";
+    process.env.TIDAL_CLIENT_ID = "tidal-client-id";
+    process.env.TIDAL_CLIENT_SECRET = "tidal-client-secret";
+    process.env.TIDAL_AUTHORIZATION_URL = "https://login.tidal.com/authorize";
   });
 
   it("blocks unapproved requests", async () => {
@@ -56,5 +59,19 @@ describe("GET /api/auth/[provider]/start", () => {
     });
 
     expect(response.status).toBe(404);
+  });
+
+  it("builds tidal authorization url with pkce parameters", async () => {
+    const cookieValue = createApprovalCookieValue("friend@example.com", process.env.APPROVAL_COOKIE_SECRET!);
+    const response = await GET(buildRequest(cookieValue), {
+      params: Promise.resolve({ provider: "tidal" })
+    });
+
+    expect(response.status).toBe(307);
+    const location = response.headers.get("location");
+    expect(location).toContain("https://login.tidal.com/authorize");
+    expect(location).toContain("client_id=tidal-client-id");
+    expect(location).toContain("code_challenge=");
+    expect(location).toContain("code_challenge_method=S256");
   });
 });

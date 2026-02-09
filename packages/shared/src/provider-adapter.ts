@@ -3,11 +3,13 @@ export type OAuthProvider = "spotify" | "tidal";
 export interface OAuthAuthorizationRequest {
   state: string;
   redirectUri: string;
+  codeChallenge?: string;
 }
 
 export interface OAuthTokenExchangeRequest {
   code: string;
   redirectUri: string;
+  codeVerifier?: string;
 }
 
 export interface OAuthTokenSet {

@@ -8,6 +8,7 @@ interface OAuthStatePayload {
   provider: OAuthProvider;
   approvedEmail: string;
   state: string;
+  codeVerifier?: string;
   createdAt: number;
 }
 
@@ -24,12 +25,14 @@ function decodePayload(value: string): OAuthStatePayload | null {
       (parsed.provider === "spotify" || parsed.provider === "tidal") &&
       typeof parsed.approvedEmail === "string" &&
       typeof parsed.state === "string" &&
+      (typeof parsed.codeVerifier === "undefined" || typeof parsed.codeVerifier === "string") &&
       typeof parsed.createdAt === "number"
     ) {
       return {
         provider: parsed.provider,
         approvedEmail: parsed.approvedEmail,
         state: parsed.state,
+        codeVerifier: parsed.codeVerifier,
         createdAt: parsed.createdAt
       };
     }
@@ -55,12 +58,14 @@ export function createOAuthStateCookieValue(
   provider: OAuthProvider,
   approvedEmail: string,
   state: string,
-  secret: string
+  secret: string,
+  codeVerifier?: string
 ): string {
   const payload = encodePayload({
     provider,
     approvedEmail,
     state,
+    codeVerifier,
     createdAt: Date.now()
   });
 
