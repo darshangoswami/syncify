@@ -23,8 +23,8 @@ function normalizeOrigin(value: string): string {
 function normalizeOAuthOrigin(provider: OAuthProvider, origin: string): string {
   const url = new URL(origin);
 
-  // Spotify local development requires loopback IP literals, not localhost.
-  if (provider === "spotify" && (url.hostname === "localhost" || url.hostname === "[::1]")) {
+  // OAuth providers can reject localhost callbacks; prefer loopback IP literal in local dev.
+  if ((provider === "spotify" || provider === "tidal") && (url.hostname === "localhost" || url.hostname === "[::1]")) {
     url.hostname = "127.0.0.1";
   }
 
