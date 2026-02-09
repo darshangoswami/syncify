@@ -1,7 +1,7 @@
 "use client";
 
-import type { FormEvent, ReactElement } from "react";
-import { useEffect, useMemo, useState } from "react";
+import type { FormEvent, MouseEvent, ReactElement } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 type NoticeTone = "success" | "warning" | "neutral";
@@ -68,18 +68,23 @@ export function LandingShell(): ReactElement {
     window.location.replace(url.toString());
   }, []);
 
-  const connectHref = useMemo(() => {
+  const connectHref = "/api/auth/spotify/start";
+
+  function handleConnectClick(event: MouseEvent<HTMLAnchorElement>): void {
     if (typeof window === "undefined") {
-      return "/api/auth/spotify/start";
+      return;
     }
 
-    const url = new URL("/api/auth/spotify/start", window.location.origin);
-    if (url.hostname === "localhost" || url.hostname === "[::1]") {
-      url.hostname = "127.0.0.1";
+    const { hostname } = window.location;
+    if (hostname !== "localhost" && hostname !== "[::1]") {
+      return;
     }
 
-    return url.toString();
-  }, []);
+    event.preventDefault();
+    const url = new URL(connectHref, window.location.origin);
+    url.hostname = "127.0.0.1";
+    window.location.assign(url.toString());
+  }
 
   async function submitInvite(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -276,6 +281,7 @@ export function LandingShell(): ReactElement {
             <motion.a
               className={`connect-link ${isApproved ? "enabled" : "disabled"}`}
               href={connectHref}
+              onClick={handleConnectClick}
               whileHover={isApproved ? hoverLift : undefined}
               whileTap={isApproved ? tapShrink : undefined}
             >
