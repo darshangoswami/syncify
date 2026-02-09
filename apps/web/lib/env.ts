@@ -131,7 +131,13 @@ export function getTidalOAuthConfig(): ProviderOAuthConfig {
     clientSecret: process.env.TIDAL_CLIENT_SECRET || "",
     authorizationUrl: process.env.TIDAL_AUTHORIZATION_URL || "https://login.tidal.com/authorize",
     tokenUrl: process.env.TIDAL_TOKEN_URL || "https://auth.tidal.com/v1/oauth2/token",
-    scopes: asScopes(process.env.TIDAL_SCOPES, ["user.read", "playlists.read", "collection.read"])
+    scopes: asScopes(process.env.TIDAL_SCOPES, [
+      "user.read",
+      "playlists.read",
+      "collection.read",
+      "playlists.write",
+      "collection.write"
+    ])
   };
 }
 

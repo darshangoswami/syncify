@@ -1,6 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
-import type { SourceTrack, TransferPreviewRequest, TransferPreviewResult } from "@spotify-xyz/shared";
+import type {
+  SourceTrack,
+  TransferMatchedTrack,
+  TransferPreviewPlaylistBreakdown,
+  TransferPreviewRequest,
+  TransferPreviewResult,
+  TransferPreviewResultV2
+} from "@spotify-xyz/shared";
 import { requireApprovedEmail, requireProviderSession } from "@/lib/auth-gate";
 import {
   listSpotifyLikedTracks,
@@ -12,13 +19,12 @@ import {
   matchTrackAgainstCandidates
 } from "@/lib/transfer-matcher";
 
-const PREVIEW_MAX_TRACKS = 200;
-
 const previewRequestSchema = z.object({
   sourceProvider: z.enum(["spotify", "tidal"]),
   destinationProvider: z.enum(["spotify", "tidal"]),
   playlistIds: z.array(z.string().min(1)).optional(),
-  includeLiked: z.boolean().optional()
+  includeLiked: z.boolean().optional(),
+  playlistNames: z.record(z.string()).optional()
 });
 
 function dedupeTracks(tracks: SourceTrack[]): SourceTrack[] {
@@ -32,6 +38,11 @@ function dedupeTracks(tracks: SourceTrack[]): SourceTrack[] {
   }
 
   return [...byKey.values()];
+}
+
+interface MatchResult {
+  matched: TransferMatchedTrack;
+  playlistId: string;
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -52,11 +63,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid transfer preview request." }, { status: 400 });
   }
 
-  const input: TransferPreviewRequest = {
+  const input: TransferPreviewRequest & { playlistNames?: Record<string, string> } = {
     sourceProvider: parsed.data.sourceProvider,
     destinationProvider: parsed.data.destinationProvider,
     playlistIds: parsed.data.playlistIds || [],
-    includeLiked: parsed.data.includeLiked ?? true
+    includeLiked: parsed.data.includeLiked ?? true,
+    playlistNames: parsed.data.playlistNames
   };
 
   if (input.sourceProvider !== "spotify" || input.destinationProvider !== "tidal") {
@@ -80,34 +92,54 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "No source inputs selected for preview." }, { status: 400 });
   }
 
-  const sourceTracks: SourceTrack[] = [];
+  // Collect source tracks grouped by playlist
+  const tracksByPlaylist = new Map<string, SourceTrack[]>();
+
   try {
     for (const playlistId of input.playlistIds || []) {
       const playlistTracks = await listSpotifyPlaylistTracks(sourceSession.session, playlistId);
-      sourceTracks.push(...playlistTracks);
+      const tagged = playlistTracks.map((t) => ({ ...t, playlistId }));
+      tracksByPlaylist.set(playlistId, tagged);
     }
 
     if (input.includeLiked) {
       const likedTracks = await listSpotifyLikedTracks(sourceSession.session);
-      sourceTracks.push(...likedTracks);
+      const tagged = likedTracks.map((t) => ({ ...t, playlistId: "liked" }));
+      tracksByPlaylist.set("liked", tagged);
     }
   } catch {
     return NextResponse.json({ error: "Failed to load source tracks for preview." }, { status: 502 });
   }
 
-  const uniqueTracks = dedupeTracks(sourceTracks);
-  const tracksForPreview = uniqueTracks.slice(0, PREVIEW_MAX_TRACKS);
+  // Flatten and dedupe for matching
+  const allTracks: SourceTrack[] = [];
+  for (const tracks of tracksByPlaylist.values()) {
+    allTracks.push(...tracks);
+  }
+  const uniqueTracks = dedupeTracks(allTracks);
 
-  let matched = 0;
+  // Match all tracks, recording per-playlist results
+  let totalMatched = 0;
   const unmatchedTracks: TransferPreviewResult["unmatchedTracks"] = [];
-  for (const sourceTrack of tracksForPreview) {
+  const matchResults: MatchResult[] = [];
+
+  for (const sourceTrack of uniqueTracks) {
     try {
       const query = buildDestinationSearchQuery(sourceTrack);
       const candidates = await searchTidalTracks(destinationSession.session, query);
       const matchedTrack = matchTrackAgainstCandidates(sourceTrack, candidates);
 
       if (matchedTrack) {
-        matched += 1;
+        totalMatched += 1;
+        matchResults.push({
+          matched: {
+            sourceTrackId: sourceTrack.id,
+            destinationTrackId: matchedTrack.id,
+            title: sourceTrack.title,
+            artist: sourceTrack.artist
+          },
+          playlistId: sourceTrack.playlistId || "liked"
+        });
       } else {
         unmatchedTracks.push({
           trackId: sourceTrack.id,
@@ -126,11 +158,33 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
   }
 
-  const preview: TransferPreviewResult = {
-    matched,
+  // Build per-playlist breakdowns
+  const playlistNames = input.playlistNames || {};
+  const playlists: TransferPreviewPlaylistBreakdown[] = [];
+
+  for (const [playlistId, tracks] of tracksByPlaylist) {
+    const deduped = dedupeTracks(tracks);
+    const playlistMatches = matchResults.filter((r) => r.playlistId === playlistId);
+    const playlistUnmatched = deduped.length - playlistMatches.length;
+
+    playlists.push({
+      playlistId,
+      playlistName: playlistId === "liked"
+        ? "Liked Songs"
+        : playlistNames[playlistId] || `Playlist ${playlistId}`,
+      totalTracks: deduped.length,
+      matchedCount: playlistMatches.length,
+      unmatchedCount: playlistUnmatched,
+      matchedTracks: playlistMatches.map((r) => r.matched)
+    });
+  }
+
+  const preview: TransferPreviewResultV2 = {
+    matched: totalMatched,
     unmatched: unmatchedTracks.length,
-    totalSourceTracks: tracksForPreview.length,
-    unmatchedTracks
+    totalSourceTracks: uniqueTracks.length,
+    unmatchedTracks,
+    playlists
   };
 
   return NextResponse.json({

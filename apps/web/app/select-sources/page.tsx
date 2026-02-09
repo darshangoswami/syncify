@@ -4,12 +4,14 @@ import type { SourcePlaylist } from "@spotify-xyz/shared";
 import type { ReactElement } from "react";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface PlaylistItem extends SourcePlaylist {
   type: "liked" | "playlist";
 }
 
 export default function SelectSourcesPage(): ReactElement {
+  const router = useRouter();
   const [playlists, setPlaylists] = useState<PlaylistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -73,6 +75,20 @@ export default function SelectSourcesPage(): ReactElement {
       }
       return next;
     });
+  }
+
+  function handleTransfer(): void {
+    const playlistIds = [...selectedIds].filter((id) => id !== "liked");
+    const includeLiked = selectedIds.has("liked");
+    const params = new URLSearchParams();
+    if (playlistIds.length > 0) params.set("playlists", playlistIds.join(","));
+    if (includeLiked) params.set("liked", "true");
+    const nameMap: Record<string, string> = {};
+    for (const p of playlists.filter((pl) => selectedIds.has(pl.id))) {
+      nameMap[p.id] = p.name;
+    }
+    params.set("names", JSON.stringify(nameMap));
+    router.push(`/transfer?${params.toString()}`);
   }
 
   function toggleSelectAll(): void {
@@ -264,7 +280,11 @@ export default function SelectSourcesPage(): ReactElement {
 
         {/* Bottom CTA */}
         <div className="absolute bottom-0 left-0 right-0 p-6 pt-10 bg-gradient-to-t from-background-dark via-background-dark/90 to-transparent">
-          <button className="w-full bg-primary text-black font-extrabold text-lg py-5 rounded-[24px] shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+          <button
+            className="w-full bg-primary text-black font-extrabold text-lg py-5 rounded-[24px] shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:scale-100"
+            disabled={selectedIds.size === 0}
+            onClick={handleTransfer}
+          >
             Transfer to TIDAL
             <span className="material-icons-round font-bold">arrow_forward</span>
           </button>

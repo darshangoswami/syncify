@@ -186,5 +186,10 @@ describe("POST /api/transfer/preview", () => {
         reason: "no_destination_match"
       }
     ]);
+    expect(payload.preview.playlists).toHaveLength(1);
+    expect(payload.preview.playlists[0].playlistId).toBe("pl-1");
+    expect(payload.preview.playlists[0].matchedCount).toBe(2);
+    expect(payload.preview.playlists[0].unmatchedCount).toBe(1);
+    expect(payload.preview.playlists[0].matchedTracks).toHaveLength(2);
   });
 });
