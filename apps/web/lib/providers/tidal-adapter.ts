@@ -14,8 +14,8 @@ function requireTidalConfig(): {
   scopes: string[];
 } {
   const config = getTidalOAuthConfig();
-  if (!config.clientId || !config.clientSecret) {
-    throw new Error("TIDAL OAuth is not configured. Missing TIDAL_CLIENT_ID or TIDAL_CLIENT_SECRET.");
+  if (!config.clientId) {
+    throw new Error("TIDAL OAuth is not configured. Missing TIDAL_CLIENT_ID.");
   }
 
   return config;
@@ -23,24 +23,35 @@ function requireTidalConfig(): {
 
 function buildAuthorizationUrl(input: OAuthAuthorizationRequest): URL {
   const config = requireTidalConfig();
+  if (!input.codeChallenge) {
+    throw new Error("TIDAL OAuth requires PKCE code challenge.");
+  }
+
   const url = new URL(config.authorizationUrl);
   url.searchParams.set("client_id", config.clientId);
   url.searchParams.set("response_type", "code");
   url.searchParams.set("redirect_uri", input.redirectUri);
   url.searchParams.set("state", input.state);
   url.searchParams.set("scope", config.scopes.join(" "));
+  url.searchParams.set("code_challenge", input.codeChallenge);
+  url.searchParams.set("code_challenge_method", "S256");
 
   return url;
 }
 
 async function exchangeCodeForToken(input: OAuthTokenExchangeRequest) {
   const config = requireTidalConfig();
+  if (!input.codeVerifier) {
+    throw new Error("TIDAL OAuth requires PKCE code verifier.");
+  }
+
   return exchangeAuthorizationCode({
     tokenUrl: config.tokenUrl,
     clientId: config.clientId,
-    clientSecret: config.clientSecret,
+    clientSecret: config.clientSecret || undefined,
     code: input.code,
-    redirectUri: input.redirectUri
+    redirectUri: input.redirectUri,
+    codeVerifier: input.codeVerifier
   });
 }
 

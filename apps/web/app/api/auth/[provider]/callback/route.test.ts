@@ -132,4 +132,25 @@ describe("GET /api/auth/[provider]/callback", () => {
 
     expect(response.status).toBe(502);
   });
+
+  it("rejects tidal callback when pkce verifier is missing from state", async () => {
+    const state = "state123";
+    const approvalCookie = createApprovalCookieValue("friend@example.com", process.env.APPROVAL_COOKIE_SECRET!);
+    const stateCookie = createOAuthStateCookieValue(
+      "tidal",
+      "friend@example.com",
+      state,
+      process.env.OAUTH_STATE_SECRET!
+    );
+    const request = buildRequest(`http://localhost/api/auth/tidal/callback?code=abc&state=${state}`, [
+      `${getApprovalCookieName()}=${approvalCookie}`,
+      `${getOAuthStateCookieName("tidal")}=${stateCookie}`
+    ]);
+
+    const response = await GET(request, {
+      params: Promise.resolve({ provider: "tidal" })
+    });
+
+    expect(response.status).toBe(400);
+  });
 });

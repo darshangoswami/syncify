@@ -7,6 +7,7 @@ import {
   getOAuthStateCookieMaxAge,
   getOAuthStateCookieName
 } from "@/lib/oauth-state";
+import { createPkceChallenge, createPkceVerifier } from "@/lib/pkce";
 import { getOAuthCallbackUrl, getOAuthProviderAdapter, isOAuthProvider } from "@/lib/providers";
 
 export async function GET(
@@ -24,18 +25,27 @@ export async function GET(
   }
 
   const state = createOAuthState();
+  const codeVerifier = provider === "tidal" ? createPkceVerifier() : undefined;
+  const codeChallenge = codeVerifier ? createPkceChallenge(codeVerifier) : undefined;
   const redirectUri = getOAuthCallbackUrl(provider, request.nextUrl.origin);
 
   try {
     const authorizationUrl = getOAuthProviderAdapter(provider).buildAuthorizationUrl({
       state,
-      redirectUri
+      redirectUri,
+      codeChallenge
     });
 
     const response = NextResponse.redirect(authorizationUrl);
     response.cookies.set({
       name: getOAuthStateCookieName(provider),
-      value: createOAuthStateCookieValue(provider, approval.approvedEmail, state, getOAuthStateSecret()),
+      value: createOAuthStateCookieValue(
+        provider,
+        approval.approvedEmail,
+        state,
+        getOAuthStateSecret(),
+        codeVerifier
+      ),
       httpOnly: true,
       sameSite: "lax",
       secure: process.env.NODE_ENV === "production",

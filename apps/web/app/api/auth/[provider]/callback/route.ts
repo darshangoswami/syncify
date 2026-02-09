@@ -53,10 +53,15 @@ export async function GET(
     return NextResponse.json({ error: "OAuth state validation failed." }, { status: 400 });
   }
 
+  if (provider === "tidal" && !pendingState.codeVerifier) {
+    return NextResponse.json({ error: "OAuth PKCE verifier was not found." }, { status: 400 });
+  }
+
   try {
     const tokenSet = await getOAuthProviderAdapter(provider).exchangeCodeForToken({
       code,
-      redirectUri: getOAuthCallbackUrl(provider, request.nextUrl.origin)
+      redirectUri: getOAuthCallbackUrl(provider, request.nextUrl.origin),
+      codeVerifier: pendingState.codeVerifier
     });
     const session = createProviderSession(provider, tokenSet);
 

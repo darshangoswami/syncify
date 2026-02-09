@@ -129,7 +129,7 @@ export function getTidalOAuthConfig(): ProviderOAuthConfig {
   return {
     clientId: process.env.TIDAL_CLIENT_ID || "",
     clientSecret: process.env.TIDAL_CLIENT_SECRET || "",
-    authorizationUrl: process.env.TIDAL_AUTHORIZATION_URL || "https://auth.tidal.com/v1/oauth2/authorize",
+    authorizationUrl: process.env.TIDAL_AUTHORIZATION_URL || "https://login.tidal.com/authorize",
     tokenUrl: process.env.TIDAL_TOKEN_URL || "https://auth.tidal.com/v1/oauth2/token",
     scopes: asScopes(process.env.TIDAL_SCOPES, ["playlist.read", "playlist.write", "collection.read"])
   };
