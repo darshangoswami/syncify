@@ -24,7 +24,7 @@ export async function GET(
   }
 
   const state = createOAuthState();
-  const redirectUri = getOAuthCallbackUrl(provider);
+  const redirectUri = getOAuthCallbackUrl(provider, request.nextUrl.origin);
 
   try {
     const authorizationUrl = getOAuthProviderAdapter(provider).buildAuthorizationUrl({

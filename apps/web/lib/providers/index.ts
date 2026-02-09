@@ -16,6 +16,11 @@ export function getOAuthProviderAdapter(provider: OAuthProvider): OAuthProviderA
   return adapters[provider];
 }
 
-export function getOAuthCallbackUrl(provider: OAuthProvider): string {
-  return new URL(`/api/auth/${provider}/callback`, getAppBaseUrl()).toString();
+function normalizeOrigin(value: string): string {
+  return value.endsWith("/") ? value.slice(0, -1) : value;
+}
+
+export function getOAuthCallbackUrl(provider: OAuthProvider, requestOrigin?: string): string {
+  const baseUrl = requestOrigin ? normalizeOrigin(requestOrigin) : getAppBaseUrl();
+  return new URL(`/api/auth/${provider}/callback`, baseUrl).toString();
 }
