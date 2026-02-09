@@ -56,7 +56,7 @@ export async function GET(
   try {
     const tokenSet = await getOAuthProviderAdapter(provider).exchangeCodeForToken({
       code,
-      redirectUri: getOAuthCallbackUrl(provider)
+      redirectUri: getOAuthCallbackUrl(provider, request.nextUrl.origin)
     });
     const session = createProviderSession(provider, tokenSet);
 
