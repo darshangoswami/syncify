@@ -121,7 +121,7 @@ export default function SelectSourcesPage(): ReactElement {
 
   return (
     <div className="flex justify-center items-center min-h-screen">
-      <div className="relative w-[375px] min-h-[812px] bg-background-dark overflow-hidden flex flex-col">
+      <div className="relative w-[375px] h-[812px] bg-background-dark overflow-hidden flex flex-col">
         {/* Header */}
         <header className="px-6 py-4 flex items-center justify-between">
           <Link
