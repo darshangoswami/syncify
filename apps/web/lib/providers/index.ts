@@ -20,7 +20,19 @@ function normalizeOrigin(value: string): string {
   return value.endsWith("/") ? value.slice(0, -1) : value;
 }
 
+function normalizeOAuthOrigin(provider: OAuthProvider, origin: string): string {
+  const url = new URL(origin);
+
+  // Spotify local development requires loopback IP literals, not localhost.
+  if (provider === "spotify" && (url.hostname === "localhost" || url.hostname === "[::1]")) {
+    url.hostname = "127.0.0.1";
+  }
+
+  return normalizeOrigin(url.toString());
+}
+
 export function getOAuthCallbackUrl(provider: OAuthProvider, requestOrigin?: string): string {
-  const baseUrl = requestOrigin ? normalizeOrigin(requestOrigin) : getAppBaseUrl();
-  return new URL(`/api/auth/${provider}/callback`, baseUrl).toString();
+  const baseUrl = requestOrigin ? requestOrigin : getAppBaseUrl();
+  const normalizedBaseUrl = normalizeOAuthOrigin(provider, baseUrl);
+  return new URL(`/api/auth/${provider}/callback`, normalizedBaseUrl).toString();
 }
