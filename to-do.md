@@ -130,7 +130,7 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
   - [x] Public landing access gate with "syncify" branding, request invite CTA, already approved CTA
   - [x] Request invite flow page with email form, success state, and back navigation
   - [x] Provider connections page with approval check, Spotify/TIDAL OAuth cards, connected states
-  - [x] Select music sources page (UI shell with mock playlist data, checkboxes, search)
+  - [x] Select music sources page wired to real Spotify API (fetches all playlists + liked songs count)
   - [x] `GET /api/status` endpoint for checking approval + provider connection status
   - [x] OAuth callback now redirects to `/connections` instead of `/`
   - [x] Replaced custom CSS with Tailwind CSS v4 (`@tailwindcss/postcss`)
@@ -195,3 +195,4 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - 2026-02-09: Hardened local OAuth host behavior by canonicalizing callback origin for Spotify/TIDAL compatibility with provider redirect constraints.
 - 2026-02-09: Updated TIDAL OAuth integration to use PKCE and current authorization defaults/scopes, resolving login/authorization flow issues.
 - 2026-02-10: Full UI redesign from design mockups: replaced single-page custom CSS UI with multi-page Tailwind CSS app (landing, request-invite, connections, select-sources), added `/api/status` endpoint, switched to Plus Jakarta Sans + Material Icons, updated OAuth callback redirect to `/connections`.
+- 2026-02-10: Wired select-sources page to real Spotify API: fetches all user playlists + liked songs count, removed mock data and syncing animation, added loading/error states.
