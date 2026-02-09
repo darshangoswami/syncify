@@ -14,7 +14,8 @@ Status: Active (private beta build)
 - Invite request flow with email capture.
 - Approval check flow using `APPROVED_EMAILS` env allowlist.
 - Hard API gating for auth/source/transfer routes until approved.
-- Placeholder auth/transfer endpoints with guarded access.
+- Real Spotify/TIDAL OAuth start/callback flows with guarded access.
+- Transfer preview with deterministic matching; transfer execution endpoints still placeholder.
 - Production-ready frontend quality baseline and automated tests for invite/approval.
 
 ### Out of scope (v1)
@@ -80,7 +81,8 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - Guarded routes (403 until approved):
   - `GET /api/auth/[provider]/start`
   - `GET /api/auth/[provider]/callback`
-  - Auth endpoints now execute provider OAuth start/callback flows.
+  - Auth endpoints execute provider OAuth start/callback flows (TIDAL uses PKCE).
+  - Local dev OAuth callback URLs canonicalize to loopback host (`127.0.0.1`) for provider compatibility.
   - `GET /api/source/playlists`
   - `GET /api/source/liked`
   - Source endpoints now return Spotify data for approved users with valid provider sessions.
@@ -115,6 +117,12 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - [x] Test coverage for key invite/approval behavior.
 - [x] `pnpm typecheck` and `pnpm test` passing.
 - [x] Transfer preview backend slice (Spotify source reads + TIDAL destination matching with deterministic rules).
+- [x] OAuth reliability hardening:
+  - [x] local callback host canonicalization for Spotify/TIDAL (`localhost` -> `127.0.0.1` where required)
+  - [x] TIDAL PKCE support in auth start/callback + token exchange
+  - [x] updated TIDAL OAuth defaults/scopes to current-compatible values (`login.tidal.com/authorize`, read-focused scopes)
+- [x] Approval step UI now includes provider-specific connect CTAs (`Connect Spotify`, `Connect TIDAL`).
+- [x] Resolved hydration mismatch in connect CTA by keeping SSR/CSR `href` stable.
 
 ## 7) Pending work (priority order)
 ## P0 - Core functionality
@@ -124,6 +132,7 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - [x] Implement transfer preview logic (playlist + liked songs inputs).
 - [ ] Implement transfer execution logic (chunked add, skip unmatched, result report).
 - [x] Implement deterministic track matching (`ISRC` first, strict metadata fallback).
+- [ ] Add write-capable TIDAL scopes and re-consent path when transfer execution is implemented.
 
 ## P1 - Reliability and UX
 - [ ] Add robust API error taxonomy for provider failures/rate limits/token refresh.
@@ -169,3 +178,6 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - 2026-02-08: Dark theme redesign of landing page inspired by Rebank (PR #3 on `claude/work` branch): replaced light theme with dark UI, added sticky nav, hero glow, glassmorphic cards, purple accent system, and gradient typography via 5-iteration Playwright loop.
 - 2026-02-09: Completed manual quality-gate flow checks for invite success, approval gating, and guarded route 403/200 behavior.
 - 2026-02-09: Implemented transfer preview backend slice with Spotify source reads, TIDAL destination matching, provider-session gating, and new route + matcher tests.
+- 2026-02-09: Added dual provider connect CTAs on landing (`Connect Spotify` + `Connect TIDAL`) and fixed connect-link hydration mismatch.
+- 2026-02-09: Hardened local OAuth host behavior by canonicalizing callback origin for Spotify/TIDAL compatibility with provider redirect constraints.
+- 2026-02-09: Updated TIDAL OAuth integration to use PKCE and current authorization defaults/scopes, resolving login/authorization flow issues.
