@@ -59,17 +59,40 @@ export interface TransferPreviewResult {
   unmatchedTracks: TransferPreviewUnmatchedTrack[];
 }
 
-export interface TransferChunkRequest {
-  sourceProvider: string;
-  destinationProvider: string;
+export interface TransferMatchedTrack {
+  sourceTrackId: string;
+  destinationTrackId: string;
+  title: string;
+  artist: string;
+}
+
+export interface TransferPreviewPlaylistBreakdown {
   playlistId: string;
-  tracks: TransferTrack[];
+  playlistName: string;
+  totalTracks: number;
+  matchedCount: number;
+  unmatchedCount: number;
+  matchedTracks: TransferMatchedTrack[];
+}
+
+export interface TransferPreviewResultV2 extends TransferPreviewResult {
+  playlists: TransferPreviewPlaylistBreakdown[];
+}
+
+export interface TransferChunkRequest {
+  destinationProvider: "tidal";
+  playlistId: string;
+  playlistName: string;
+  destinationPlaylistId?: string;
+  trackIds: string[];
 }
 
 export interface TransferChunkResult {
   added: number;
   skipped: number;
-  unmatched: Array<{ trackId: string; reason: string }>;
+  failed: number;
+  failedTracks: Array<{ trackId: string; reason: string }>;
+  destinationPlaylistId: string;
 }
 
 export type {

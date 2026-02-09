@@ -1,6 +1,6 @@
 # Spotify XYZ Project Spec and TODO
 
-Last updated: 2026-02-10
+Last updated: 2026-02-09
 Owner: Dexter
 Status: Active (private beta build)
 
@@ -15,12 +15,12 @@ Status: Active (private beta build)
 - Approval check flow using `APPROVED_EMAILS` env allowlist.
 - Hard API gating for auth/source/transfer routes until approved.
 - Real Spotify/TIDAL OAuth start/callback flows with guarded access.
-- Transfer preview with deterministic matching; transfer execution endpoints still placeholder.
+- Transfer preview with deterministic matching and transfer execution with chunked TIDAL writes.
 - Production-ready frontend quality baseline and automated tests for invite/approval.
 
 ### Out of scope (v1)
 - Persistent invite/transfer database.
-- Real playlist/liked-song transfer logic.
+- Persistent transfer history/retry from saved state.
 - Automated allowlist updates in Spotify dashboard.
 
 ### Constraints
@@ -88,9 +88,10 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
   - Source endpoints now return Spotify data for approved users with valid provider sessions.
   - `POST /api/transfer/preview`
   - Preview endpoint now runs Spotify-source to TIDAL-destination deterministic matching.
-  - Remaining placeholder responses:
   - `POST /api/transfer/chunk`
+  - Chunk endpoint executes real TIDAL writes: creates playlists, adds tracks in batches, adds to favorites for liked songs.
   - `POST /api/transfer/finalize`
+  - Placeholder (finalize not needed — results accumulated client-side).
 - `GET /api/status`
   - Returns `{ approved, spotifyConnected, tidalConnected }` based on signed cookies
 
@@ -136,6 +137,19 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
   - [x] Replaced custom CSS with Tailwind CSS v4 (`@tailwindcss/postcss`)
   - [x] Switched fonts from Sora/Source Sans 3 to Plus Jakarta Sans
   - [x] Localhost canonicalization extracted to shared `CanonicalHostGuard` component
+- [x] Transfer execution feature (full flow):
+  - [x] Enhanced preview endpoint with per-playlist breakdowns and matched TIDAL track IDs
+  - [x] TIDAL write functions (create playlist, add tracks, add to favorites)
+  - [x] Real chunk endpoint with TIDAL write logic (batched adds, per-track error handling)
+  - [x] Updated TIDAL OAuth default scopes to include `playlists.write`, `collection.write`
+  - [x] New shared types: `TransferMatchedTrack`, `TransferPreviewPlaylistBreakdown`, `TransferPreviewResultV2`, updated `TransferChunkRequest`/`TransferChunkResult`
+  - [x] `/transfer` page with three-phase state machine (preview, progress, results)
+  - [x] Transfer preview screen with hero card, per-playlist breakdown, unmatched warning
+  - [x] Live transfer progress screen with circular progress, current track display, stop button, estimated time
+  - [x] Transfer results screen with 2x2 stats grid, match rate bar, unmatched text box with copy button
+  - [x] Wired select-sources "Transfer to TIDAL" button to navigate to `/transfer` with selected playlists
+  - [x] Error handling: 401 session expiry, 429 rate limit retry with exponential backoff, per-track failure recording
+  - [x] Cancellation support: "Stop Transfer" preserves partial results
 
 ## 7) Pending work (priority order)
 ## P0 - Core functionality
@@ -143,15 +157,15 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - [x] Implement real TIDAL OAuth start/callback flow.
 - [x] Add provider adapter contract package and concrete Spotify/TIDAL adapters.
 - [x] Implement transfer preview logic (playlist + liked songs inputs).
-- [ ] Implement transfer execution logic (chunked add, skip unmatched, result report).
+- [x] Implement transfer execution logic (chunked add, skip unmatched, result report).
 - [x] Implement deterministic track matching (`ISRC` first, strict metadata fallback).
-- [ ] Add write-capable TIDAL scopes and re-consent path when transfer execution is implemented.
+- [x] Add write-capable TIDAL scopes and re-consent path when transfer execution is implemented.
 
 ## P1 - Reliability and UX
 - [ ] Add robust API error taxonomy for provider failures/rate limits/token refresh.
-- [ ] Add downloadable unmatched report artifact (CSV/JSON).
-- [ ] Add progress UX for transfer run state and retries.
-- [ ] Add clear empty/loading/error UI states for all transfer screens.
+- [x] Add unmatched report with copy-to-clipboard (text box instead of CSV).
+- [x] Add progress UX for transfer run state and retries.
+- [x] Add clear empty/loading/error UI states for all transfer screens.
 
 ## P1 - Ops and productization
 - [ ] Configure and verify Resend production sender domain.
@@ -196,3 +210,4 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - 2026-02-09: Updated TIDAL OAuth integration to use PKCE and current authorization defaults/scopes, resolving login/authorization flow issues.
 - 2026-02-10: Full UI redesign from design mockups: replaced single-page custom CSS UI with multi-page Tailwind CSS app (landing, request-invite, connections, select-sources), added `/api/status` endpoint, switched to Plus Jakarta Sans + Material Icons, updated OAuth callback redirect to `/connections`.
 - 2026-02-10: Wired select-sources page to real Spotify API: fetches all user playlists + liked songs count, removed mock data and syncing animation, added loading/error states.
+- 2026-02-09: Transfer execution feature: enhanced preview with per-playlist breakdowns + matched TIDAL track IDs, created TIDAL write functions (playlist creation, track adding, favorites), implemented real chunk endpoint, built `/transfer` page with three-phase UI (preview summary, live progress with circular indicator, results with stats grid and unmatched text box + copy), added TIDAL write scopes, wired select-sources transfer button, added error handling (session expiry, rate limit retry, cancellation).
