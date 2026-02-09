@@ -68,9 +68,10 @@ export function LandingShell(): ReactElement {
     window.location.replace(url.toString());
   }, []);
 
-  const connectHref = "/api/auth/spotify/start";
+  const spotifyConnectHref = "/api/auth/spotify/start";
+  const tidalConnectHref = "/api/auth/tidal/start";
 
-  function handleConnectClick(event: MouseEvent<HTMLAnchorElement>): void {
+  function handleConnectClick(event: MouseEvent<HTMLAnchorElement>, href: string): void {
     if (typeof window === "undefined") {
       return;
     }
@@ -81,7 +82,7 @@ export function LandingShell(): ReactElement {
     }
 
     event.preventDefault();
-    const url = new URL(connectHref, window.location.origin);
+    const url = new URL(href, window.location.origin);
     url.hostname = "127.0.0.1";
     window.location.assign(url.toString());
   }
@@ -187,7 +188,7 @@ export function LandingShell(): ReactElement {
           <p className="beta-pill">Private Access</p>
           <h1>Move playlists with a controlled onboarding flow.</h1>
           <p className="lead-copy">
-            Request access, wait for manual approval, then connect Spotify when your email is allowlisted.
+            Request access, wait for manual approval, then connect Spotify and TIDAL when your email is allowlisted.
           </p>
           <div className="policy-tags">
             <span>Manual access review</span>
@@ -204,7 +205,7 @@ export function LandingShell(): ReactElement {
             </header>
 
             <h2>Request Invite</h2>
-            <p className="section-copy">Submit the email you want allowlisted for Spotify connection access.</p>
+            <p className="section-copy">Submit the email you want allowlisted for provider connection access.</p>
 
             <form onSubmit={submitInvite} className="form-stack">
               <label htmlFor="invite-email">Email</label>
@@ -280,12 +281,21 @@ export function LandingShell(): ReactElement {
 
             <motion.a
               className={`connect-link ${isApproved ? "enabled" : "disabled"}`}
-              href={connectHref}
-              onClick={handleConnectClick}
+              href={spotifyConnectHref}
+              onClick={(event) => handleConnectClick(event, spotifyConnectHref)}
               whileHover={isApproved ? hoverLift : undefined}
               whileTap={isApproved ? tapShrink : undefined}
             >
               Connect Spotify
+            </motion.a>
+            <motion.a
+              className={`connect-link connect-link-tidal ${isApproved ? "enabled" : "disabled"}`}
+              href={tidalConnectHref}
+              onClick={(event) => handleConnectClick(event, tidalConnectHref)}
+              whileHover={isApproved ? hoverLift : undefined}
+              whileTap={isApproved ? tapShrink : undefined}
+            >
+              Connect TIDAL
             </motion.a>
           </motion.article>
         </section>
