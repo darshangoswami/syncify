@@ -13,7 +13,7 @@ import {
   listSpotifyLikedTracks,
   listSpotifyPlaylistTracks
 } from "@/lib/providers/spotify-catalog";
-import { searchTidalTracks } from "@/lib/providers/tidal-catalog";
+import { lookupTidalTracksByIsrc, searchTidalTracks } from "@/lib/providers/tidal-catalog";
 import {
   buildDestinationSearchQuery,
   matchTrackAgainstCandidates
@@ -118,12 +118,56 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   }
   const uniqueTracks = dedupeTracks(allTracks);
 
-  // Match all tracks, recording per-playlist results
+  // Phase 1: Batch ISRC lookup (fast — resolves most tracks in ~100 API calls)
+  const isrcToSource = new Map<string, SourceTrack[]>();
+  const tracksWithoutIsrc: SourceTrack[] = [];
+
+  for (const track of uniqueTracks) {
+    if (track.isrc) {
+      const key = track.isrc.trim().toUpperCase();
+      const list = isrcToSource.get(key) || [];
+      list.push(track);
+      isrcToSource.set(key, list);
+    } else {
+      tracksWithoutIsrc.push(track);
+    }
+  }
+
   let totalMatched = 0;
   const unmatchedTracks: TransferPreviewResult["unmatchedTracks"] = [];
   const matchResults: MatchResult[] = [];
 
-  for (const sourceTrack of uniqueTracks) {
+  // Batch lookup all ISRCs
+  const isrcResults = await lookupTidalTracksByIsrc(
+    destinationSession.session,
+    [...isrcToSource.keys()]
+  );
+
+  // Record ISRC matches
+  const isrcMissed: SourceTrack[] = [];
+  for (const [isrc, sourceTracks] of isrcToSource) {
+    const tidalTrack = isrcResults.get(isrc);
+    if (tidalTrack) {
+      for (const sourceTrack of sourceTracks) {
+        totalMatched += 1;
+        matchResults.push({
+          matched: {
+            sourceTrackId: sourceTrack.id,
+            destinationTrackId: tidalTrack.id,
+            title: sourceTrack.title,
+            artist: sourceTrack.artist
+          },
+          playlistId: sourceTrack.playlistId || "liked"
+        });
+      }
+    } else {
+      isrcMissed.push(...sourceTracks);
+    }
+  }
+
+  // Phase 2: Search fallback for tracks without ISRC or ISRC not found on TIDAL
+  const searchFallbacks = [...tracksWithoutIsrc, ...isrcMissed];
+  for (const sourceTrack of searchFallbacks) {
     try {
       const query = buildDestinationSearchQuery(sourceTrack);
       const candidates = await searchTidalTracks(destinationSession.session, query);

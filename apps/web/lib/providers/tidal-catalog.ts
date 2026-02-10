@@ -218,15 +218,13 @@ function normalizeTrackNode(value: unknown): unknown {
 const THROTTLE_MS = 250;
 const MAX_RETRIES = 4;
 const RETRY_BASE_MS = 1000;
+const ISRC_BATCH_SIZE = 20;
 
-export async function searchTidalTracks(
-  session: ProviderSession,
-  query: string
-): Promise<SourceTrack[]> {
-  const url = buildSearchUrl(query);
-
+async function fetchWithRetry(
+  url: string,
+  session: ProviderSession
+): Promise<{ response: Response; payload: unknown }> {
   let response: Response | null = null;
-  let payload: unknown = null;
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     if (attempt > 0) {
@@ -237,9 +235,7 @@ export async function searchTidalTracks(
 
     response = await fetch(url, {
       method: "GET",
-      headers: {
-        Authorization: getAuthHeader(session)
-      }
+      headers: { Authorization: getAuthHeader(session) }
     });
 
     if (response.status !== 429) break;
@@ -249,6 +245,7 @@ export async function searchTidalTracks(
     throw new TidalApiError("TIDAL API request failed after retries.", 429);
   }
 
+  let payload: unknown = null;
   try {
     payload = await response.json();
   } catch {
@@ -258,6 +255,56 @@ export async function searchTidalTracks(
   if (!response.ok) {
     throw new TidalApiError("TIDAL API request failed.", response.status);
   }
+
+  return { response, payload };
+}
+
+/**
+ * Batch-resolve TIDAL tracks by ISRC codes.
+ * Returns a map of ISRC -> SourceTrack for all found tracks.
+ */
+export async function lookupTidalTracksByIsrc(
+  session: ProviderSession,
+  isrcs: string[]
+): Promise<Map<string, SourceTrack>> {
+  const result = new Map<string, SourceTrack>();
+  if (isrcs.length === 0) return result;
+
+  const config = getTidalApiConfig();
+
+  for (let i = 0; i < isrcs.length; i += ISRC_BATCH_SIZE) {
+    const batch = isrcs.slice(i, i + ISRC_BATCH_SIZE);
+    const url = new URL(`${config.apiBaseUrl}/tracks`);
+    for (const isrc of batch) {
+      url.searchParams.append("filter[isrc]", isrc);
+    }
+    url.searchParams.set("countryCode", config.countryCode);
+
+    try {
+      const { payload } = await fetchWithRetry(url.toString(), session);
+      // Extract from "data" directly (not "included" which would contain related resources)
+      const root = payload as { data?: unknown[] } | null;
+      const nodes = Array.isArray(root?.data) ? root.data : [];
+      for (const node of nodes) {
+        const track = toSourceTrack(normalizeTrackNode(node));
+        if (track?.isrc) {
+          result.set(track.isrc, track);
+        }
+      }
+    } catch {
+      // Skip failed batches — tracks will fall back to search
+    }
+  }
+
+  return result;
+}
+
+export async function searchTidalTracks(
+  session: ProviderSession,
+  query: string
+): Promise<SourceTrack[]> {
+  const url = buildSearchUrl(query);
+  const { payload } = await fetchWithRetry(url, session);
 
   const trackNodes = extractTrackArray(payload);
   const tracks: SourceTrack[] = [];
