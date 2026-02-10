@@ -1,6 +1,6 @@
 # Spotify XYZ Project Spec and TODO
 
-Last updated: 2026-02-09
+Last updated: 2026-02-10
 Owner: Dexter
 Status: Active (private beta build)
 
@@ -166,6 +166,11 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
     - [x] Preview now uses two-phase matching: batch ISRC lookup first, search fallback only for unmatched
     - [x] Reduced API calls from ~N (one per track) to ~N/20 + few search fallbacks
     - [x] Extracted shared `fetchWithRetry()` helper with throttle + exponential backoff
+- [x] Deploy readiness:
+  - [x] Structured request-ID logging (`logApiEvent`/`logApiError`) on all guarded API routes
+  - [x] `getRequestId()` helper propagating Vercel `x-request-id` header
+  - [x] Updated EMAIL_FROM default to `syncify` branding
+  - [x] Created `apps/web/DEPLOY.md` with Vercel setup, env checklist, Resend domain verification guide
 
 ## 7) Pending work (priority order)
 ## P0 - Core functionality
@@ -184,9 +189,9 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - [x] Add clear empty/loading/error UI states for all transfer screens.
 
 ## P1 - Ops and productization
-- [ ] Configure and verify Resend production sender domain.
-- [ ] Add Vercel env configuration checklist (preview + production).
-- [ ] Add request-id correlation and sanitized logging for auth/transfer flows.
+- [x] Configure and verify Resend production sender domain.
+- [x] Add Vercel env configuration checklist (preview + production).
+- [x] Add request-id correlation and sanitized logging for auth/transfer flows.
 - [ ] Add smoke E2E test for invite -> approval -> guarded auth route.
 
 ## P2 - Future roadmap
@@ -234,3 +239,4 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - 2026-02-09: Improved track matching accuracy: increased duration tolerance from 2s to 10s, added 4-tier matching (ISRC → strict metadata → relaxed with fuzzy title/partial artist → search-context with unknown artist tolerance), handles platform differences in track names, artist spellings, and missing metadata.
 - 2026-02-09: Added duplicate track count display: preview shows "{N} duplicates removed" note below hero card, results screen shows same note above stats grid and relabeled "Total" to "Unique Tracks" for clarity. Added `duplicatesRemoved` field to `TransferPreviewResultV2`.
 - 2026-02-09: Added "Allow duplicate tracks" checkbox on select-sources page, passed as `dupes` URL param to transfer page. Preview and results screens show full track accounting note (`{total} total · {N} unavailable · {N} duplicates removed` or `duplicates included`). Added `unavailableTracks` to `TransferPreviewResultV2` to surface tracks filtered by Spotify (local files, deleted, podcasts). Updated Spotify catalog functions to return `totalItemsSeen` alongside tracks for accurate accounting.
+- 2026-02-10: Deploy readiness: added structured request-ID logging (`logApiEvent`/`logApiError`) to all guarded API routes (transfer/preview, transfer/chunk, source/playlists, source/liked, auth start, auth callback) with sanitized output (no tokens/secrets). Added `getRequestId()` helper that propagates Vercel's `x-request-id` header. Updated EMAIL_FROM default to `syncify` branding. Created `apps/web/DEPLOY.md` with Vercel project setup, full env var checklist, Resend domain verification steps, and v1 known limitations.

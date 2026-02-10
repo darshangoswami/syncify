@@ -1,9 +1,14 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { requireApprovedEmail, requireProviderSession } from "@/lib/auth-gate";
+import { logApiEvent, logApiError } from "@/lib/logging";
 import { listSpotifyLikedTracks } from "@/lib/providers/spotify-catalog";
 import { isOAuthProvider } from "@/lib/providers";
+import { getRequestId } from "@/lib/request";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
+  const requestId = getRequestId(request);
+  const startedAt = Date.now();
+
   const approval = requireApprovedEmail(request);
   if (!approval.ok) {
     return approval.response;
@@ -25,11 +30,17 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
   try {
     const result = await listSpotifyLikedTracks(session.session);
+    logApiEvent({
+      requestId, method: "GET", path: "/api/source/liked", status: 200,
+      durationMs: Date.now() - startedAt, kind: "source_liked",
+      detail: `count=${result.tracks.length}`
+    });
     return NextResponse.json({
       sourceProvider,
       tracks: result.tracks
     });
-  } catch {
+  } catch (err) {
+    logApiError({ requestId, method: "GET", path: "/api/source/liked", kind: "source_liked", error: err instanceof Error ? err.message : "Failed to load liked tracks" });
     return NextResponse.json({ error: "Failed to load source liked tracks." }, { status: 502 });
   }
 }

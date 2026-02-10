@@ -1,11 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { requireApprovedEmail, requireProviderSession } from "@/lib/auth-gate";
+import { logApiEvent, logApiError } from "@/lib/logging";
 import {
   createTidalPlaylist,
   addTracksToTidalPlaylist,
   addTracksToTidalFavorites
 } from "@/lib/providers/tidal-write";
+import { getRequestId } from "@/lib/request";
 
 const chunkRequestSchema = z.object({
   destinationProvider: z.literal("tidal"),
@@ -16,6 +18,9 @@ const chunkRequestSchema = z.object({
 });
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  const requestId = getRequestId(request);
+  const startedAt = Date.now();
+
   const approval = requireApprovedEmail(request);
   if (!approval.ok) {
     return approval.response;
@@ -73,6 +78,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           playlistName
         );
       } catch (err) {
+        logApiError({ requestId, method: "POST", path: "/api/transfer/chunk", kind: "transfer_chunk", error: err instanceof Error ? err.message : "Failed to create TIDAL playlist" });
         return NextResponse.json(
           {
             error: `Failed to create TIDAL playlist: ${err instanceof Error ? err.message : "Unknown error"}`
@@ -105,6 +111,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
     }
   }
+
+  logApiEvent({
+    requestId, method: "POST", path: "/api/transfer/chunk", status: 200,
+    durationMs: Date.now() - startedAt, kind: "transfer_chunk",
+    detail: `playlist=${playlistId} added=${added} failed=${failed} tracks=${trackIds.length}`
+  });
 
   return NextResponse.json({
     ok: true,
