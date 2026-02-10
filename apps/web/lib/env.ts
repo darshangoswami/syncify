@@ -74,7 +74,7 @@ export function getEmailProviderApiKey(): string {
 }
 
 export function getEmailFrom(): string {
-  return process.env.EMAIL_FROM || "Spotify XYZ <noreply@example.com>";
+  return process.env.EMAIL_FROM || "syncify <noreply@example.com>";
 }
 
 export function getAppBaseUrl(): string {

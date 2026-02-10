@@ -9,11 +9,13 @@ import type {
   TransferPreviewResultV2
 } from "@spotify-xyz/shared";
 import { requireApprovedEmail, requireProviderSession } from "@/lib/auth-gate";
+import { logApiEvent, logApiError } from "@/lib/logging";
 import {
   listSpotifyLikedTracks,
   listSpotifyPlaylistTracks
 } from "@/lib/providers/spotify-catalog";
 import { lookupTidalTracksByIsrc, searchTidalTracks } from "@/lib/providers/tidal-catalog";
+import { getRequestId } from "@/lib/request";
 import {
   buildDestinationSearchQuery,
   matchTrackAgainstCandidates
@@ -47,6 +49,9 @@ interface MatchResult {
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  const requestId = getRequestId(request);
+  const startedAt = Date.now();
+
   const approval = requireApprovedEmail(request);
   if (!approval.ok) {
     return approval.response;
@@ -112,7 +117,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       const tagged = result.tracks.map((t) => ({ ...t, playlistId: "liked" }));
       tracksByPlaylist.set("liked", tagged);
     }
-  } catch {
+  } catch (err) {
+    logApiError({ requestId, method: "POST", path: "/api/transfer/preview", kind: "transfer_preview", error: err instanceof Error ? err.message : "Failed to load source tracks" });
     return NextResponse.json({ error: "Failed to load source tracks for preview." }, { status: 502 });
   }
 
@@ -237,6 +243,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     unmatchedTracks,
     playlists
   };
+
+  logApiEvent({
+    requestId, method: "POST", path: "/api/transfer/preview", status: 200,
+    durationMs: Date.now() - startedAt, kind: "transfer_preview",
+    detail: `matched=${totalMatched} unmatched=${unmatchedTracks.length} total=${uniqueTracks.length}`
+  });
 
   return NextResponse.json({
     ok: true,
