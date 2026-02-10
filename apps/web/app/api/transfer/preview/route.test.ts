@@ -131,26 +131,31 @@ describe("POST /api/transfer/preview", () => {
           { status: 200, headers: { "content-type": "application/json" } }
         )
       )
+      // ISRC batch lookup: returns tidal-1 matched by ISRC
       .mockResolvedValueOnce(
         new Response(
           JSON.stringify({
-            tracks: [{ id: "tidal-1", title: "Any Name", artist: "Any Artist", isrc: "USAAA1111111" }]
+            data: [{ id: "tidal-1", type: "tracks", attributes: { title: "Any Name", isrc: "USAAA1111111" } }]
           }),
           { status: 200, headers: { "content-type": "application/json" } }
         )
       )
+      // Search fallback for src-2 (no ISRC): metadata match
       .mockResolvedValueOnce(
         new Response(
           JSON.stringify({
-            tracks: [{ id: "tidal-2", title: "City Lights Edit", artist: "Nova", durationMs: 201000 }]
+            included: [{ id: "tidal-2", type: "tracks", attributes: { title: "City Lights (Edit)", isrc: "OTHER123", duration: "PT3M20S", artists: [{ name: "Nova feat. Arc" }] } }],
+            data: [{ id: "tidal-2", type: "tracks" }]
           }),
           { status: 200, headers: { "content-type": "application/json" } }
         )
       )
+      // Search fallback for src-3 (no ISRC): no match
       .mockResolvedValueOnce(
         new Response(
           JSON.stringify({
-            tracks: [{ id: "tidal-3", title: "Different", artist: "Other", durationMs: 220000 }]
+            included: [{ id: "tidal-3", type: "tracks", attributes: { title: "Different", isrc: "NOPE999", duration: "PT3M40S" } }],
+            data: [{ id: "tidal-3", type: "tracks" }]
           }),
           { status: 200, headers: { "content-type": "application/json" } }
         )

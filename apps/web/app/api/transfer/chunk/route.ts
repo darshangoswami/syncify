@@ -12,7 +12,7 @@ const chunkRequestSchema = z.object({
   playlistId: z.string().min(1),
   playlistName: z.string().min(1),
   destinationPlaylistId: z.string().optional(),
-  trackIds: z.array(z.string().min(1)).min(1).max(50)
+  trackIds: z.array(z.string().min(1)).min(1).max(20)
 });
 
 export async function POST(request: NextRequest): Promise<NextResponse> {

@@ -31,7 +31,7 @@ interface ProgressState {
 
 /* ──────────────────────────── Constants ──────────────────────── */
 
-const CHUNK_SIZE = 25;
+const CHUNK_SIZE = 20;
 const MAX_RETRIES = 3;
 const RETRY_BASE_MS = 2000;
 
