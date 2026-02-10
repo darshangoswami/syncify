@@ -15,7 +15,52 @@ function getAuthHeader(session: ProviderSession): string {
   return `${session.tokenType || "Bearer"} ${session.accessToken}`;
 }
 
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+const THROTTLE_MS = 500;
+const MAX_RETRIES = 4;
+const RETRY_BASE_MS = 2000;
+
+async function postWithRetry(
+  url: string,
+  session: ProviderSession,
+  body: unknown
+): Promise<Response> {
+  let response: Response | null = null;
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    if (attempt > 0) {
+      await delay(RETRY_BASE_MS * Math.pow(2, attempt - 1));
+    } else {
+      await delay(THROTTLE_MS);
+    }
+
+    response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: getAuthHeader(session),
+        "Content-Type": "application/vnd.api+json"
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (response.status !== 429) break;
+  }
+
+  if (!response) {
+    throw new TidalWriteError("TIDAL API request failed after retries.", 429);
+  }
+
+  return response;
+}
+
+let cachedUserId: string | null = null;
+
 async function getTidalUserId(session: ProviderSession): Promise<string> {
+  if (cachedUserId) return cachedUserId;
+
   const config = getTidalApiConfig();
   const response = await fetch(`${config.apiBaseUrl}/users/me`, {
     headers: { Authorization: getAuthHeader(session) }
@@ -38,7 +83,8 @@ async function getTidalUserId(session: ProviderSession): Promise<string> {
     throw new TidalWriteError("TIDAL user ID not found.", 502);
   }
 
-  return String(userId);
+  cachedUserId = String(userId);
+  return cachedUserId;
 }
 
 export async function createTidalPlaylist(
@@ -48,21 +94,14 @@ export async function createTidalPlaylist(
   const config = getTidalApiConfig();
   const url = `${config.apiBaseUrl}/playlists?countryCode=${config.countryCode}`;
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      Authorization: getAuthHeader(session),
-      "Content-Type": "application/vnd.api+json"
-    },
-    body: JSON.stringify({
-      data: {
-        type: "playlists",
-        attributes: {
-          name,
-          description: "Transferred from Spotify via syncify"
-        }
+  const response = await postWithRetry(url, session, {
+    data: {
+      type: "playlists",
+      attributes: {
+        name,
+        description: "Transferred from Spotify via syncify"
       }
-    })
+    }
   });
 
   if (!response.ok) {
@@ -99,24 +138,11 @@ export async function addTracksToTidalPlaylist(
   const config = getTidalApiConfig();
   const url = `${config.apiBaseUrl}/playlists/${playlistId}/relationships/items`;
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      Authorization: getAuthHeader(session),
-      "Content-Type": "application/vnd.api+json"
-    },
-    body: JSON.stringify({
-      data: trackIds.map((id) => ({
-        id,
-        type: "tracks"
-      }))
-    })
+  const response = await postWithRetry(url, session, {
+    data: trackIds.map((id) => ({ id, type: "tracks" }))
   });
 
   if (!response.ok) {
-    if (response.status === 429) {
-      throw new TidalWriteError("TIDAL rate limit exceeded.", 429);
-    }
     let body = "";
     try { body = await response.text(); } catch { /* ignore */ }
     throw new TidalWriteError(
@@ -128,37 +154,33 @@ export async function addTracksToTidalPlaylist(
   return { added: trackIds.length, failed: 0, failedIds: [] };
 }
 
-export async function addTrackToTidalFavorites(
+export async function addTracksToTidalFavorites(
   session: ProviderSession,
-  trackId: string
-): Promise<boolean> {
+  trackIds: string[]
+): Promise<{ added: number; failed: number; failedIds: string[] }> {
+  if (trackIds.length === 0) {
+    return { added: 0, failed: 0, failedIds: [] };
+  }
+
   const config = getTidalApiConfig();
   const userId = await getTidalUserId(session);
   const url = `${config.apiBaseUrl}/userCollections/${userId}/relationships/tracks`;
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      Authorization: getAuthHeader(session),
-      "Content-Type": "application/vnd.api+json"
-    },
-    body: JSON.stringify({
-      data: [{ id: trackId, type: "tracks" }]
-    })
+  const response = await postWithRetry(url, session, {
+    data: trackIds.map((id) => ({ id, type: "tracks" }))
   });
 
   if (!response.ok) {
-    if (response.status === 429) {
-      throw new TidalWriteError("TIDAL rate limit exceeded.", 429);
-    }
     if (response.status === 409) {
-      return true;
+      return { added: trackIds.length, failed: 0, failedIds: [] };
     }
+    let body = "";
+    try { body = await response.text(); } catch { /* ignore */ }
     throw new TidalWriteError(
-      `Failed to add track to TIDAL favorites: ${response.status}`,
+      `Failed to add tracks to TIDAL favorites: ${response.status} ${body}`,
       response.status
     );
   }
 
-  return true;
+  return { added: trackIds.length, failed: 0, failedIds: [] };
 }

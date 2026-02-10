@@ -4,7 +4,7 @@ import { requireApprovedEmail, requireProviderSession } from "@/lib/auth-gate";
 import {
   createTidalPlaylist,
   addTracksToTidalPlaylist,
-  addTrackToTidalFavorites
+  addTracksToTidalFavorites
 } from "@/lib/providers/tidal-write";
 
 const chunkRequestSchema = z.object({
@@ -46,13 +46,17 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const failedTracks: Array<{ trackId: string; reason: string }> = [];
 
   if (playlistId === "liked") {
-    // Add tracks to TIDAL favorites one by one
-    for (const trackId of trackIds) {
-      try {
-        await addTrackToTidalFavorites(tidalSession.session, trackId);
-        added += 1;
-      } catch (err) {
-        failed += 1;
+    // Add tracks to TIDAL favorites in batch
+    try {
+      const result = await addTracksToTidalFavorites(tidalSession.session, trackIds);
+      added = result.added;
+      failed = result.failed;
+      for (const id of result.failedIds) {
+        failedTracks.push({ trackId: id, reason: "Failed to add to favorites" });
+      }
+    } catch (err) {
+      failed = trackIds.length;
+      for (const trackId of trackIds) {
         failedTracks.push({
           trackId,
           reason: err instanceof Error ? err.message : "Unknown error"
