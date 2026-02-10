@@ -227,6 +227,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     matched: totalMatched,
     unmatched: unmatchedTracks.length,
     totalSourceTracks: uniqueTracks.length,
+    duplicatesRemoved: allTracks.length - uniqueTracks.length,
     unmatchedTracks,
     playlists
   };

@@ -77,6 +77,7 @@ export interface TransferPreviewPlaylistBreakdown {
 
 export interface TransferPreviewResultV2 extends TransferPreviewResult {
   playlists: TransferPreviewPlaylistBreakdown[];
+  duplicatesRemoved: number;
 }
 
 export interface TransferChunkRequest {
