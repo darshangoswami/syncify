@@ -65,6 +65,7 @@ function TransferPageInner(): ReactElement {
   const playlistIdsParam = searchParams.get("playlists") || "";
   const includeLiked = searchParams.get("liked") === "true";
   const namesParam = searchParams.get("names") || "{}";
+  const allowDuplicates = searchParams.get("dupes") === "true";
 
   const playlistIds = playlistIdsParam ? playlistIdsParam.split(",").filter(Boolean) : [];
   let playlistNames: Record<string, string> = {};
@@ -76,6 +77,8 @@ function TransferPageInner(): ReactElement {
 
   /* ──── Fetch preview ──── */
   const fetchPreview = useCallback(async () => {
+    setLoading(true);
+    setError("");
     try {
       const res = await fetch("/api/transfer/preview", {
         method: "POST",
@@ -85,7 +88,8 @@ function TransferPageInner(): ReactElement {
           destinationProvider: "tidal",
           playlistIds: playlistIds.length > 0 ? playlistIds : undefined,
           includeLiked,
-          playlistNames
+          playlistNames,
+          allowDuplicates
         })
       });
 
@@ -430,10 +434,13 @@ function TransferPageInner(): ReactElement {
               </div>
             </section>
 
-            {/* Duplicates note */}
-            {preview.duplicatesRemoved > 0 && (
+            {/* Track accounting note */}
+            {(preview.duplicatesRemoved > 0 || preview.unavailableTracks > 0 || allowDuplicates) && (
               <p className="text-center text-xs text-zinc-500 -mt-3">
-                {(preview.totalSourceTracks + preview.duplicatesRemoved).toLocaleString()} total · {preview.duplicatesRemoved.toLocaleString()} duplicates removed
+                {(preview.totalSourceTracks + preview.duplicatesRemoved + preview.unavailableTracks).toLocaleString()} total
+                {preview.unavailableTracks > 0 && ` · ${preview.unavailableTracks.toLocaleString()} unavailable`}
+                {preview.duplicatesRemoved > 0 && !allowDuplicates && ` · ${preview.duplicatesRemoved.toLocaleString()} duplicates removed`}
+                {allowDuplicates && " · duplicates included"}
               </p>
             )}
 
@@ -704,14 +711,16 @@ function TransferPageInner(): ReactElement {
           {/* Scrollable content */}
           <div className="flex-1 overflow-y-auto px-6 pb-48 space-y-4">
             {/* Stats grid */}
-            {preview && preview.duplicatesRemoved > 0 && (
+            {preview && (preview.duplicatesRemoved > 0 || preview.unavailableTracks > 0) && (
               <p className="text-center text-xs text-zinc-500">
-                {(preview.totalSourceTracks + preview.duplicatesRemoved).toLocaleString()} total songs · {preview.duplicatesRemoved.toLocaleString()} duplicates removed
+                {(preview.totalSourceTracks + preview.duplicatesRemoved + preview.unavailableTracks).toLocaleString()} total songs
+                {preview.unavailableTracks > 0 && ` · ${preview.unavailableTracks.toLocaleString()} unavailable`}
+                {preview.duplicatesRemoved > 0 && !allowDuplicates && ` · ${preview.duplicatesRemoved.toLocaleString()} duplicates removed`}
               </p>
             )}
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-[#5865F2] p-5 rounded-3xl text-white relative overflow-hidden">
-                <span className="text-xs font-bold uppercase tracking-widest opacity-80">Unique Tracks</span>
+                <span className="text-xs font-bold uppercase tracking-widest opacity-80">{allowDuplicates ? "Total Tracks" : "Unique Tracks"}</span>
                 <div className="text-4xl font-black mt-1">{preview?.totalSourceTracks.toLocaleString() || 0}</div>
                 <span className="material-icons-round absolute -bottom-2 -right-2 text-6xl opacity-20 rotate-12">library_music</span>
               </div>

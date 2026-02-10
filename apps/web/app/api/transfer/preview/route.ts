@@ -24,7 +24,8 @@ const previewRequestSchema = z.object({
   destinationProvider: z.enum(["spotify", "tidal"]),
   playlistIds: z.array(z.string().min(1)).optional(),
   includeLiked: z.boolean().optional(),
-  playlistNames: z.record(z.string()).optional()
+  playlistNames: z.record(z.string()).optional(),
+  allowDuplicates: z.boolean().optional()
 });
 
 function dedupeTracks(tracks: SourceTrack[]): SourceTrack[] {
@@ -63,12 +64,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid transfer preview request." }, { status: 400 });
   }
 
-  const input: TransferPreviewRequest & { playlistNames?: Record<string, string> } = {
+  const input: TransferPreviewRequest & { playlistNames?: Record<string, string>; allowDuplicates?: boolean } = {
     sourceProvider: parsed.data.sourceProvider,
     destinationProvider: parsed.data.destinationProvider,
     playlistIds: parsed.data.playlistIds || [],
     includeLiked: parsed.data.includeLiked ?? true,
-    playlistNames: parsed.data.playlistNames
+    playlistNames: parsed.data.playlistNames,
+    allowDuplicates: parsed.data.allowDuplicates ?? false
   };
 
   if (input.sourceProvider !== "spotify" || input.destinationProvider !== "tidal") {
@@ -94,17 +96,20 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   // Collect source tracks grouped by playlist
   const tracksByPlaylist = new Map<string, SourceTrack[]>();
+  let totalItemsSeen = 0;
 
   try {
     for (const playlistId of input.playlistIds || []) {
-      const playlistTracks = await listSpotifyPlaylistTracks(sourceSession.session, playlistId);
-      const tagged = playlistTracks.map((t) => ({ ...t, playlistId }));
+      const result = await listSpotifyPlaylistTracks(sourceSession.session, playlistId);
+      totalItemsSeen += result.totalItemsSeen;
+      const tagged = result.tracks.map((t) => ({ ...t, playlistId }));
       tracksByPlaylist.set(playlistId, tagged);
     }
 
     if (input.includeLiked) {
-      const likedTracks = await listSpotifyLikedTracks(sourceSession.session);
-      const tagged = likedTracks.map((t) => ({ ...t, playlistId: "liked" }));
+      const result = await listSpotifyLikedTracks(sourceSession.session);
+      totalItemsSeen += result.totalItemsSeen;
+      const tagged = result.tracks.map((t) => ({ ...t, playlistId: "liked" }));
       tracksByPlaylist.set("liked", tagged);
     }
   } catch {
@@ -116,7 +121,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   for (const tracks of tracksByPlaylist.values()) {
     allTracks.push(...tracks);
   }
-  const uniqueTracks = dedupeTracks(allTracks);
+  const uniqueTracks = input.allowDuplicates ? allTracks : dedupeTracks(allTracks);
 
   // Phase 1: Batch ISRC lookup (fast — resolves most tracks in ~100 API calls)
   const isrcToSource = new Map<string, SourceTrack[]>();
@@ -207,16 +212,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const playlists: TransferPreviewPlaylistBreakdown[] = [];
 
   for (const [playlistId, tracks] of tracksByPlaylist) {
-    const deduped = dedupeTracks(tracks);
+    const playlistTracks = input.allowDuplicates ? tracks : dedupeTracks(tracks);
     const playlistMatches = matchResults.filter((r) => r.playlistId === playlistId);
-    const playlistUnmatched = deduped.length - playlistMatches.length;
+    const playlistUnmatched = playlistTracks.length - playlistMatches.length;
 
     playlists.push({
       playlistId,
       playlistName: playlistId === "liked"
         ? "Liked Songs"
         : playlistNames[playlistId] || `Playlist ${playlistId}`,
-      totalTracks: deduped.length,
+      totalTracks: playlistTracks.length,
       matchedCount: playlistMatches.length,
       unmatchedCount: playlistUnmatched,
       matchedTracks: playlistMatches.map((r) => r.matched)
@@ -228,6 +233,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     unmatched: unmatchedTracks.length,
     totalSourceTracks: uniqueTracks.length,
     duplicatesRemoved: allTracks.length - uniqueTracks.length,
+    unavailableTracks: totalItemsSeen - allTracks.length,
     unmatchedTracks,
     playlists
   };

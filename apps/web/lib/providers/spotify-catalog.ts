@@ -130,14 +130,21 @@ export async function listSpotifyPlaylists(session: ProviderSession): Promise<So
   return playlists;
 }
 
-export async function listSpotifyLikedTracks(session: ProviderSession): Promise<SourceTrack[]> {
+export interface SpotifyTrackListResult {
+  tracks: SourceTrack[];
+  totalItemsSeen: number;
+}
+
+export async function listSpotifyLikedTracks(session: ProviderSession): Promise<SpotifyTrackListResult> {
   const tracks: SourceTrack[] = [];
+  let totalItemsSeen = 0;
   let nextUrl: string | null = "/me/tracks?limit=50";
 
   while (nextUrl) {
     const payload = await spotifyGet(session, nextUrl);
     const root = payload as { items?: unknown; next?: unknown };
     const items = Array.isArray(root.items) ? root.items : [];
+    totalItemsSeen += items.length;
 
     for (const item of items) {
       if (!item || typeof item !== "object") {
@@ -153,20 +160,22 @@ export async function listSpotifyLikedTracks(session: ProviderSession): Promise<
     nextUrl = getString(root.next);
   }
 
-  return tracks;
+  return { tracks, totalItemsSeen };
 }
 
 export async function listSpotifyPlaylistTracks(
   session: ProviderSession,
   playlistId: string
-): Promise<SourceTrack[]> {
+): Promise<SpotifyTrackListResult> {
   const tracks: SourceTrack[] = [];
+  let totalItemsSeen = 0;
   let nextUrl: string | null = `/playlists/${encodeURIComponent(playlistId)}/tracks?limit=100`;
 
   while (nextUrl) {
     const payload = await spotifyGet(session, nextUrl);
     const root = payload as { items?: unknown; next?: unknown };
     const items = Array.isArray(root.items) ? root.items : [];
+    totalItemsSeen += items.length;
 
     for (const item of items) {
       if (!item || typeof item !== "object") {
@@ -182,5 +191,5 @@ export async function listSpotifyPlaylistTracks(
     nextUrl = getString(root.next);
   }
 
-  return tracks;
+  return { tracks, totalItemsSeen };
 }
