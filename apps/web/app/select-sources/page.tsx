@@ -17,6 +17,7 @@ export default function SelectSourcesPage(): ReactElement {
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [allowDuplicates, setAllowDuplicates] = useState(false);
 
   const fetchPlaylists = useCallback(async () => {
     try {
@@ -88,6 +89,7 @@ export default function SelectSourcesPage(): ReactElement {
       nameMap[p.id] = p.name;
     }
     params.set("names", JSON.stringify(nameMap));
+    if (allowDuplicates) params.set("dupes", "true");
     router.push(`/transfer?${params.toString()}`);
   }
 
@@ -280,6 +282,22 @@ export default function SelectSourcesPage(): ReactElement {
 
         {/* Bottom CTA */}
         <div className="absolute bottom-0 left-0 right-0 p-6 pt-10 bg-gradient-to-t from-background-dark via-background-dark/90 to-transparent">
+          <button
+            type="button"
+            className="flex items-center justify-center gap-2 w-full mb-3"
+            onClick={() => setAllowDuplicates((v) => !v)}
+          >
+            <div
+              className={`w-5 h-5 rounded-md border-2 ${
+                allowDuplicates ? "border-primary bg-primary" : "border-zinc-600 bg-transparent"
+              } flex items-center justify-center transition-colors`}
+            >
+              {allowDuplicates && (
+                <span className="material-icons-round text-white text-[16px] font-bold">check</span>
+              )}
+            </div>
+            <span className="text-xs text-zinc-400 font-semibold">Allow duplicate tracks</span>
+          </button>
           <button
             className="w-full bg-primary text-black font-extrabold text-lg py-5 rounded-[24px] shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:scale-100"
             disabled={selectedIds.size === 0}

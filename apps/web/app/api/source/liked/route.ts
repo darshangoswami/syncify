@@ -24,10 +24,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   }
 
   try {
-    const tracks = await listSpotifyLikedTracks(session.session);
+    const result = await listSpotifyLikedTracks(session.session);
     return NextResponse.json({
       sourceProvider,
-      tracks
+      tracks: result.tracks
     });
   } catch {
     return NextResponse.json({ error: "Failed to load source liked tracks." }, { status: 502 });
