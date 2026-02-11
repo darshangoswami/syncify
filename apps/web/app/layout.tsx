@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactElement, ReactNode } from "react";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans, Gochi_Hand } from "next/font/google";
 import { CanonicalHostGuard } from "@/components/canonical-host-guard";
 import "@/app/globals.css";
 
@@ -8,6 +8,12 @@ const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
   variable: "--font-sans",
+});
+
+const gochiHand = Gochi_Hand({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-handwriting",
 });
 
 export const metadata: Metadata = {
@@ -28,7 +34,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className={`${plusJakarta.variable} font-sans bg-background-dark text-white antialiased`}>
+      <body className={`${plusJakarta.variable} ${gochiHand.variable} font-sans bg-background-dark text-white antialiased`}>
         <CanonicalHostGuard />
         {children}
       </body>

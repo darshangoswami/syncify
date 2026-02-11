@@ -865,21 +865,29 @@ function TransferPageInner(): ReactElement {
 
           {/* Bottom actions */}
           <div className="absolute bottom-0 left-0 right-0 p-6 pt-10 bg-gradient-to-t from-[#121212] via-[#121212]/90 to-transparent space-y-3">
-            {hasUnmatched && (
+            <div className={`grid ${hasUnmatched ? "grid-cols-2" : "grid-cols-1"} gap-3`}>
+              {hasUnmatched && (
+                <button
+                  className="bg-primary text-black font-bold py-4 rounded-full flex items-center justify-center gap-2 active:scale-[0.98] transition-all text-sm"
+                  onClick={() => void copyReport()}
+                >
+                  <span className="material-icons-round text-lg">{copied ? "check" : "content_copy"}</span>
+                  {copied ? "Copied!" : "Copy Report"}
+                </button>
+              )}
               <button
-                className="w-full bg-primary text-black font-extrabold py-4 rounded-full flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
-                onClick={() => void copyReport()}
+                className="bg-transparent text-white border-2 border-zinc-800 font-bold py-4 rounded-full flex items-center justify-center gap-2 hover:bg-zinc-900 active:scale-[0.98] transition-all text-sm"
+                onClick={() => router.push("/select-sources")}
               >
-                <span className="material-icons-round">{copied ? "check" : "content_copy"}</span>
-                {copied ? "Copied!" : "Copy Unmatched Report"}
+                <span className="material-icons-round text-lg">refresh</span>
+                New Transfer
               </button>
-            )}
+            </div>
             <button
-              className="w-full bg-transparent text-white border-2 border-zinc-800 font-bold py-4 rounded-full flex items-center justify-center gap-2 hover:bg-zinc-900 active:scale-[0.98] transition-all"
-              onClick={() => router.push("/select-sources")}
+              className="w-full bg-zinc-900 text-zinc-300 font-bold py-4 rounded-full flex items-center justify-center gap-2 hover:bg-zinc-800 hover:text-white active:scale-[0.98] transition-all"
+              onClick={() => router.push("/done")}
             >
-              <span className="material-icons-round">refresh</span>
-              Start New Transfer
+              I&apos;m done
             </button>
           </div>
 
