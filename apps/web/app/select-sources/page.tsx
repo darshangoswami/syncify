@@ -10,6 +10,36 @@ interface PlaylistItem extends SourcePlaylist {
   type: "liked" | "playlist";
 }
 
+const CACHE_KEY = "syncify:library";
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+interface CachedLibrary {
+  playlists: PlaylistItem[];
+  cachedAt: number;
+}
+
+function getCachedLibrary(): PlaylistItem[] | null {
+  try {
+    const raw = sessionStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const cached = JSON.parse(raw) as CachedLibrary;
+    if (Date.now() - cached.cachedAt > CACHE_TTL_MS) {
+      sessionStorage.removeItem(CACHE_KEY);
+      return null;
+    }
+    return cached.playlists;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedLibrary(playlists: PlaylistItem[]): void {
+  try {
+    const entry: CachedLibrary = { playlists, cachedAt: Date.now() };
+    sessionStorage.setItem(CACHE_KEY, JSON.stringify(entry));
+  } catch { /* quota exceeded — ignore */ }
+}
+
 export default function SelectSourcesPage(): ReactElement {
   const router = useRouter();
   const [playlists, setPlaylists] = useState<PlaylistItem[]>([]);
@@ -20,6 +50,14 @@ export default function SelectSourcesPage(): ReactElement {
   const [allowDuplicates, setAllowDuplicates] = useState(false);
 
   const fetchPlaylists = useCallback(async () => {
+    const cached = getCachedLibrary();
+    if (cached) {
+      setPlaylists(cached);
+      setSelectedIds(new Set(cached.map((p) => p.id)));
+      setLoading(false);
+      return;
+    }
+
     try {
       const [playlistsRes, likedRes] = await Promise.all([
         fetch("/api/source/playlists"),
@@ -47,6 +85,7 @@ export default function SelectSourcesPage(): ReactElement {
         }))
       ];
 
+      setCachedLibrary(items);
       setPlaylists(items);
       setSelectedIds(new Set(items.map((p) => p.id)));
     } catch {
@@ -91,6 +130,15 @@ export default function SelectSourcesPage(): ReactElement {
     params.set("names", JSON.stringify(nameMap));
     if (allowDuplicates) params.set("dupes", "true");
     router.push(`/transfer?${params.toString()}`);
+  }
+
+  function refreshLibrary(): void {
+    sessionStorage.removeItem(CACHE_KEY);
+    setPlaylists([]);
+    setSelectedIds(new Set());
+    setLoading(true);
+    setError("");
+    void fetchPlaylists();
   }
 
   function toggleSelectAll(): void {
@@ -149,7 +197,12 @@ export default function SelectSourcesPage(): ReactElement {
             <span className="material-icons-round">arrow_back</span>
           </Link>
           <h1 className="text-lg font-bold">Select Sources</h1>
-          <div className="w-10" />
+          <button
+            className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center"
+            onClick={refreshLibrary}
+          >
+            <span className="material-icons-round text-sm">refresh</span>
+          </button>
         </header>
 
         {/* Search + Controls */}
