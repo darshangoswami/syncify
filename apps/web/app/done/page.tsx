@@ -21,7 +21,10 @@ export default function DonePage(): ReactElement {
     } catch { /* ignore */ }
 
     try {
-      const res = await fetch("/api/auth/delete", { method: "POST" });
+      const [res] = await Promise.all([
+        fetch("/api/auth/delete", { method: "POST" }),
+        new Promise((r) => setTimeout(r, 3000)),
+      ]);
       if (res.ok) {
         setDeleteState("done");
       } else {
