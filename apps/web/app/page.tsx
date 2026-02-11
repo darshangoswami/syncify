@@ -3,8 +3,8 @@ import Link from "next/link";
 
 export default function LandingPage(): ReactElement {
   return (
-    <div className="flex justify-center items-center min-h-screen p-4">
-      <div className="relative w-full max-w-[390px] min-h-[844px] bg-background-dark flex flex-col">
+    <div className="flex justify-center min-h-dvh">
+      <div className="relative w-full max-w-100 min-h-dvh bg-background-dark flex flex-col">
         {/* Main content */}
         <div className="flex-1 overflow-y-auto px-6 pt-4 pb-8 relative">
           {/* Logo */}
@@ -30,9 +30,6 @@ export default function LandingPage(): ReactElement {
               </svg>
             </div>
             <div className="mt-8 flex gap-2">
-              <span className="px-3 py-1 bg-zinc-800 rounded-full text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                v1.10.4
-              </span>
               <span className="px-3 py-1 bg-primary/10 rounded-full text-[10px] font-bold uppercase tracking-widest text-primary">
                 Beta Access
               </span>
@@ -103,14 +100,7 @@ export default function LandingPage(): ReactElement {
 
         {/* Footer */}
         <div className="px-6 py-8 bg-gradient-to-t from-background-dark via-background-dark to-transparent">
-          <button
-            className="w-full bg-zinc-800 text-zinc-600 py-4 rounded-2xl flex items-center justify-center font-bold space-x-2 cursor-not-allowed"
-            disabled
-          >
-            <span className="material-icons-round text-[20px]">lock</span>
-            <span>Connect Providers</span>
-          </button>
-          <p className="text-center text-[11px] text-zinc-600 mt-4 px-8 leading-tight">
+          <p className="text-center text-[11px] text-zinc-600 px-8 leading-tight">
             Transfer functionality is currently locked for beta users only. Join
             the waitlist for early access.
           </p>

@@ -346,8 +346,8 @@ function TransferPageInner(): ReactElement {
   /* ──────────────────────────── Loading ──────────────────────── */
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="relative w-[375px] h-[812px] bg-background-dark flex flex-col items-center justify-center">
+      <div className="flex justify-center min-h-dvh">
+        <div className="relative w-full max-w-100 h-dvh bg-background-dark flex flex-col items-center justify-center">
           <div className="relative w-12 h-12 mb-4">
             <div className="absolute inset-0 border-4 border-dashed border-primary rounded-full animate-spin" />
             <div className="absolute inset-0 flex items-center justify-center">
@@ -363,8 +363,8 @@ function TransferPageInner(): ReactElement {
   /* ──────────────────────────── Error ─────────────────────────── */
   if (error && phase !== "progress") {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="relative w-[375px] h-[812px] bg-background-dark flex flex-col items-center justify-center px-8 text-center">
+      <div className="flex justify-center min-h-dvh">
+        <div className="relative w-full max-w-100 h-dvh bg-background-dark flex flex-col items-center justify-center px-8 text-center">
           <span className="material-icons-round text-red-500 text-5xl mb-4">error_outline</span>
           <p className="text-white font-bold text-lg mb-2">Something went wrong</p>
           <p className="text-zinc-400 text-sm mb-6">{error}</p>
@@ -388,8 +388,8 @@ function TransferPageInner(): ReactElement {
       : 0;
 
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="relative w-[375px] h-[812px] bg-background-dark overflow-hidden flex flex-col">
+      <div className="flex justify-center min-h-dvh">
+        <div className="relative w-full max-w-100 h-dvh bg-background-dark overflow-hidden flex flex-col">
           {/* Header */}
           <header className="px-6 py-4 flex items-center justify-between">
             <Link
@@ -558,8 +558,8 @@ function TransferPageInner(): ReactElement {
   /* ══════════════════════════════════════════════════════════════ */
   if (phase === "progress") {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="relative w-[375px] h-[812px] bg-black overflow-hidden flex flex-col">
+      <div className="flex justify-center min-h-dvh">
+        <div className="relative w-full max-w-100 h-dvh bg-black overflow-hidden flex flex-col">
           {/* Header */}
           <header className="px-6 pt-6 pb-4 flex items-center justify-between">
             <div className="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center opacity-50">
@@ -676,8 +676,8 @@ function TransferPageInner(): ReactElement {
     const hasUnmatched = unmatchedText.length > 0;
 
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="relative w-[375px] h-[812px] bg-[#121212] overflow-hidden flex flex-col">
+      <div className="flex justify-center min-h-dvh">
+        <div className="relative w-full max-w-100 h-dvh bg-[#121212] overflow-hidden flex flex-col">
           {/* Header */}
           <div className="px-6 pt-8 pb-4 relative overflow-hidden">
             <div className="flex justify-between items-start mb-6">
@@ -831,8 +831,8 @@ export default function TransferPage(): ReactElement {
   return (
     <Suspense
       fallback={
-        <div className="flex justify-center items-center min-h-screen">
-          <div className="relative w-[375px] h-[812px] bg-background-dark flex flex-col items-center justify-center">
+        <div className="flex justify-center min-h-dvh">
+          <div className="relative w-full max-w-100 h-dvh bg-background-dark flex flex-col items-center justify-center">
             <div className="relative w-12 h-12 mb-4">
               <div className="absolute inset-0 border-4 border-dashed border-primary rounded-full animate-spin" />
               <div className="absolute inset-0 flex items-center justify-center">

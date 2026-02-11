@@ -103,8 +103,8 @@ export default function SelectSourcesPage(): ReactElement {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="relative w-[375px] min-h-[812px] bg-background-dark flex flex-col items-center justify-center">
+      <div className="flex justify-center min-h-dvh">
+        <div className="relative w-full max-w-100 min-h-dvh bg-background-dark flex flex-col items-center justify-center">
           <div className="relative w-12 h-12 mb-4">
             <div className="absolute inset-0 border-4 border-dashed border-primary rounded-full animate-spin" />
             <div className="absolute inset-0 flex items-center justify-center">
@@ -119,8 +119,8 @@ export default function SelectSourcesPage(): ReactElement {
 
   if (error) {
     return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="relative w-[375px] min-h-[812px] bg-background-dark flex flex-col items-center justify-center px-8 text-center">
+      <div className="flex justify-center min-h-dvh">
+        <div className="relative w-full max-w-100 min-h-dvh bg-background-dark flex flex-col items-center justify-center px-8 text-center">
           <span className="material-icons-round text-red-500 text-5xl mb-4">error_outline</span>
           <p className="text-white font-bold text-lg mb-2">Something went wrong</p>
           <p className="text-zinc-400 text-sm mb-6">{error}</p>
@@ -138,8 +138,8 @@ export default function SelectSourcesPage(): ReactElement {
   const likedItem = filtered.find((p) => p.type === "liked");
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <div className="relative w-[375px] h-[812px] bg-background-dark overflow-hidden flex flex-col">
+    <div className="flex justify-center min-h-dvh">
+      <div className="relative w-full max-w-100 h-dvh bg-background-dark overflow-hidden flex flex-col">
         {/* Header */}
         <header className="px-6 py-4 flex items-center justify-between">
           <Link

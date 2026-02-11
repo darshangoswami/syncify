@@ -85,8 +85,8 @@ export default function ConnectionsPage(): ReactElement {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen p-4">
-        <div className="relative w-full max-w-[400px] min-h-[844px] bg-background-dark flex flex-col items-center justify-center">
+      <div className="flex justify-center min-h-dvh">
+        <div className="relative w-full max-w-100 min-h-dvh bg-background-dark flex flex-col items-center justify-center">
           <div className="relative w-12 h-12 mb-4">
             <div className="absolute inset-0 border-4 border-dashed border-primary rounded-full animate-spin" />
             <div className="absolute inset-0 flex items-center justify-center">
@@ -102,8 +102,8 @@ export default function ConnectionsPage(): ReactElement {
   // Not approved — show approval check form
   if (!status?.approved) {
     return (
-      <div className="flex justify-center items-center min-h-screen p-4">
-        <div className="relative w-full max-w-[400px] min-h-[844px] bg-background-dark flex flex-col">
+      <div className="flex justify-center min-h-dvh">
+        <div className="relative w-full max-w-100 min-h-dvh bg-background-dark flex flex-col">
           <div className="flex-1 px-6 pt-4 flex flex-col relative z-10">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
@@ -177,8 +177,8 @@ export default function ConnectionsPage(): ReactElement {
 
   // Approved — show provider connections
   return (
-    <div className="flex justify-center items-center min-h-screen p-4">
-      <div className="relative w-full max-w-[400px] min-h-[844px] bg-background-dark flex flex-col">
+    <div className="flex justify-center min-h-dvh">
+      <div className="relative w-full max-w-100 min-h-dvh bg-background-dark flex flex-col">
         {/* Floating decorative icons */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           <div className="absolute top-20 right-10 doodle-float text-primary opacity-40">
@@ -362,7 +362,7 @@ export default function ConnectionsPage(): ReactElement {
               </button>
             )}
             <p className="mt-4 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-              Secured by provider OAuth 2.0
+              Secured by OAuth 2.0 + PKCE
             </p>
           </div>
         </div>
