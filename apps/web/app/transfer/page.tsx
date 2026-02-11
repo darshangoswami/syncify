@@ -632,7 +632,7 @@ function TransferPageInner(): ReactElement {
   if (phase === "progress") {
     return (
       <div className="fixed inset-0 flex justify-center">
-        <div className="relative w-full max-w-100 h-full bg-black overflow-hidden flex flex-col">
+        <div className="relative w-full max-w-100 h-full bg-black overflow-y-auto flex flex-col">
           {/* Header */}
           <header className="px-6 pt-6 pb-4 flex items-center justify-between">
             <div className="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center opacity-50">
