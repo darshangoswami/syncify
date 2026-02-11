@@ -132,6 +132,15 @@ export default function SelectSourcesPage(): ReactElement {
     router.push(`/transfer?${params.toString()}`);
   }
 
+  function refreshLibrary(): void {
+    sessionStorage.removeItem(CACHE_KEY);
+    setPlaylists([]);
+    setSelectedIds(new Set());
+    setLoading(true);
+    setError("");
+    void fetchPlaylists();
+  }
+
   function toggleSelectAll(): void {
     if (allSelected) {
       setSelectedIds(new Set());
@@ -188,7 +197,12 @@ export default function SelectSourcesPage(): ReactElement {
             <span className="material-icons-round">arrow_back</span>
           </Link>
           <h1 className="text-lg font-bold">Select Sources</h1>
-          <div className="w-10" />
+          <button
+            className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center"
+            onClick={refreshLibrary}
+          >
+            <span className="material-icons-round text-sm">refresh</span>
+          </button>
         </header>
 
         {/* Search + Controls */}
