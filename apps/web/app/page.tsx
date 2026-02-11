@@ -3,8 +3,8 @@ import Link from "next/link";
 
 export default function LandingPage(): ReactElement {
   return (
-    <div className="flex justify-center items-center min-h-screen p-4">
-      <div className="relative w-full max-w-[390px] min-h-[844px] bg-background-dark flex flex-col">
+    <div className="flex justify-center min-h-dvh">
+      <div className="relative w-full max-w-100 min-h-dvh bg-background-dark flex flex-col">
         {/* Main content */}
         <div className="flex-1 overflow-y-auto px-6 pt-4 pb-8 relative">
           {/* Logo */}
@@ -30,9 +30,6 @@ export default function LandingPage(): ReactElement {
               </svg>
             </div>
             <div className="mt-8 flex gap-2">
-              <span className="px-3 py-1 bg-zinc-800 rounded-full text-[10px] font-bold uppercase tracking-widest text-zinc-500">
-                v1.10.4
-              </span>
               <span className="px-3 py-1 bg-primary/10 rounded-full text-[10px] font-bold uppercase tracking-widest text-primary">
                 Beta Access
               </span>
@@ -55,18 +52,15 @@ export default function LandingPage(): ReactElement {
           <div className="space-y-4 relative z-10">
             {/* Request Invite Card */}
             <Link href="/request-invite" className="w-full text-left group block transition-transform active:scale-95">
-              <div className="bg-primary p-6 rounded-[32px] relative overflow-hidden flex flex-col h-48 justify-between shadow-xl shadow-primary/20">
+              <div className="bg-primary p-6 rounded-[32px] relative overflow-hidden flex flex-col justify-between shadow-xl shadow-primary/20">
                 <div className="absolute -top-4 -right-4 opacity-20 transform rotate-12">
                   <span className="material-icons-round text-[120px] text-white">auto_awesome</span>
                 </div>
-                <div>
-                  <span className="bg-white/20 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">
-                    Waitlist
-                  </span>
-                  <h3 className="text-2xl font-extrabold text-white mt-3">Request Invite</h3>
-                </div>
-                <div className="flex items-center justify-between">
-                  <p className="text-white/80 text-sm font-medium">Join 12k+ others</p>
+                <span className="self-start bg-white/20 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">
+                  Waitlist
+                </span>
+                <div className="flex items-center justify-between mt-3">
+                  <h3 className="text-2xl font-extrabold text-white">Request Invite</h3>
                   <div className="bg-white text-primary p-2 rounded-full flex items-center justify-center">
                     <span className="material-icons-round">arrow_forward</span>
                   </div>
@@ -82,7 +76,7 @@ export default function LandingPage(): ReactElement {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-white">Already Approved?</h3>
-                  <p className="text-zinc-500 text-sm mt-1">Sign in with your access code</p>
+                  <p className="text-zinc-500 text-sm mt-1">Sign in with your approved email</p>
                 </div>
                 <div className="flex items-center text-primary font-bold text-sm">
                   Enter Portal{" "}
@@ -103,14 +97,7 @@ export default function LandingPage(): ReactElement {
 
         {/* Footer */}
         <div className="px-6 py-8 bg-gradient-to-t from-background-dark via-background-dark to-transparent">
-          <button
-            className="w-full bg-zinc-800 text-zinc-600 py-4 rounded-2xl flex items-center justify-center font-bold space-x-2 cursor-not-allowed"
-            disabled
-          >
-            <span className="material-icons-round text-[20px]">lock</span>
-            <span>Connect Providers</span>
-          </button>
-          <p className="text-center text-[11px] text-zinc-600 mt-4 px-8 leading-tight">
+          <p className="text-center text-[11px] text-zinc-600 px-8 leading-tight">
             Transfer functionality is currently locked for beta users only. Join
             the waitlist for early access.
           </p>

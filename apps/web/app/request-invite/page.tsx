@@ -47,8 +47,8 @@ export default function RequestInvitePage(): ReactElement {
   }
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <div className="max-w-[400px] w-full mx-auto min-h-screen relative overflow-hidden flex flex-col bg-background-dark">
+    <div className="flex justify-center min-h-dvh">
+      <div className="max-w-100 w-full mx-auto min-h-dvh relative overflow-hidden flex flex-col bg-background-dark">
         {/* Header */}
         <div className="px-8 pt-12 pb-8">
           <div className="flex justify-between items-start mb-10">
@@ -190,12 +190,6 @@ export default function RequestInvitePage(): ReactElement {
                 {status === "submitting" ? "Sending..." : "Request Invite"}
                 <span className="material-icons-round">arrow_forward</span>
               </button>
-
-              <p className="text-center text-xs text-zinc-600 font-medium px-8 leading-relaxed">
-                By requesting an invite, you agree to our{" "}
-                <span className="underline">Terms of Service</span> and{" "}
-                <span className="underline">Privacy Policy</span>.
-              </p>
             </form>
           ) : (
             <div className="space-y-6 text-center">
