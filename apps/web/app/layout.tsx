@@ -28,7 +28,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className={`${plusJakarta.variable} font-sans bg-background-dark text-white antialiased min-h-screen`}>
+      <body className={`${plusJakarta.variable} font-sans bg-background-dark text-white antialiased`}>
         <CanonicalHostGuard />
         {children}
       </body>

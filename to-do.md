@@ -1,6 +1,6 @@
 # Spotify XYZ Project Spec and TODO
 
-Last updated: 2026-02-10
+Last updated: 2026-02-11
 Owner: Dexter
 Status: Active (private beta build)
 
@@ -244,3 +244,4 @@ From `/Users/dexter/Developer/spotify-xyz/apps/web/.env.example`:
 - 2026-02-10: UI polish round 2: landing page — removed "Join 12k+ others" text, removed fixed height on Request Invite card, moved arrow button inline with title, fixed Waitlist pill width (`self-start`), updated "Already Approved?" subtitle to "Sign in with your approved email". Request invite page — removed Terms of Service/Privacy Policy fine print.
 - 2026-02-10: Added sessionStorage caching for Spotify playlist data on select-sources page (5-min TTL). Back navigation and "Start Another Transfer" now load instantly from cache instead of re-fetching from Spotify API. Added refresh button in header to manually clear cache and re-fetch library.
 - 2026-02-10: Fixed Vercel 300s timeout issue for large libraries: transfer preview now fetches playlists sequentially (one at a time) instead of all at once. Each request stays under 90s (safe), preview shows incremental progress "Preparing preview... (3/6) My Workout Playlist". Added `filterPlaylistId` parameter to `/api/transfer/preview` endpoint and updated client to aggregate results from multiple preview calls. Solves timeout for users with 5k+ tracks across many playlists.
+- 2026-02-11: Fixed iOS Chrome over-scroll issue: switched page wrappers to `fixed inset-0` positioning (standard mobile web app pattern) with `h-full` inner containers instead of viewport-relative `h-dvh`/`min-h-dvh`. Removed `min-h-screen` from body. Added global `overscroll-behavior: none` to prevent rubber-band bouncing. Pages now lock to visible viewport without blocking internal `overflow-y-auto` scroll containers.

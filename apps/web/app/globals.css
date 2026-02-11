@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Prevent iOS rubber-band over-scroll */
+html, body {
+  overscroll-behavior: none;
+}
+
 @theme {
   --color-primary: #22C55E;
   --color-secondary: #6366F1;
