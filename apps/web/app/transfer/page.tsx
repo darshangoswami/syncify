@@ -45,6 +45,11 @@ function TransferPageInner(): ReactElement {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [preview, setPreview] = useState<TransferPreviewResultV2 | null>(null);
+  const [previewProgress, setPreviewProgress] = useState({
+    current: 0,
+    total: 0,
+    currentName: ""
+  });
   const [progress, setProgress] = useState<ProgressState>({
     currentPlaylistName: "",
     currentTrackTitle: "",
@@ -79,33 +84,94 @@ function TransferPageInner(): ReactElement {
   const fetchPreview = useCallback(async () => {
     setLoading(true);
     setError("");
-    try {
-      const res = await fetch("/api/transfer/preview", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sourceProvider: "spotify",
-          destinationProvider: "tidal",
-          playlistIds: playlistIds.length > 0 ? playlistIds : undefined,
-          includeLiked,
-          playlistNames,
-          allowDuplicates
-        })
+
+    // Build list of units to fetch (liked + playlists)
+    const fetchUnits: Array<{ id: string; name: string }> = [];
+    if (includeLiked) {
+      fetchUnits.push({ id: "liked", name: "Liked Songs" });
+    }
+    for (const playlistId of playlistIds) {
+      fetchUnits.push({
+        id: playlistId,
+        name: playlistNames[playlistId] || `Playlist ${playlistId}`
+      });
+    }
+
+    setPreviewProgress({ current: 0, total: fetchUnits.length, currentName: "" });
+
+    // Aggregate results from each unit
+    let totalMatched = 0;
+    let totalUnmatched = 0;
+    let totalSourceTracks = 0;
+    let duplicatesRemoved = 0;
+    let unavailableTracks = 0;
+    const allUnmatchedTracks: TransferPreviewUnmatchedTrack[] = [];
+    const allPlaylists: TransferPreviewPlaylistBreakdown[] = [];
+
+    // Fetch each playlist sequentially
+    for (let i = 0; i < fetchUnits.length; i++) {
+      const unit = fetchUnits[i]!;
+
+      setPreviewProgress({
+        current: i,
+        total: fetchUnits.length,
+        currentName: unit.name
       });
 
-      if (!res.ok) {
-        const data = (await res.json().catch(() => ({}))) as { error?: string };
-        setError(data.error || `Preview failed (${res.status})`);
+      try {
+        const res = await fetch("/api/transfer/preview", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            sourceProvider: "spotify",
+            destinationProvider: "tidal",
+            playlistIds: unit.id === "liked" ? undefined : [unit.id],
+            includeLiked: unit.id === "liked",
+            playlistNames: playlistNames,
+            allowDuplicates: allowDuplicates,
+            filterPlaylistId: unit.id
+          })
+        });
+
+        if (!res.ok) {
+          const data = (await res.json().catch(() => ({}))) as { error?: string };
+          setError(data.error || `Preview failed for ${unit.name}`);
+          setLoading(false);
+          return;
+        }
+
+        const data = (await res.json()) as { preview: TransferPreviewResultV2 };
+        const partial = data.preview;
+
+        // Aggregate
+        totalMatched += partial.matched;
+        totalUnmatched += partial.unmatched;
+        totalSourceTracks += partial.totalSourceTracks;
+        duplicatesRemoved += partial.duplicatesRemoved;
+        unavailableTracks += partial.unavailableTracks;
+        allUnmatchedTracks.push(...partial.unmatchedTracks);
+        allPlaylists.push(...partial.playlists);
+
+      } catch (err) {
+        setError(`Failed to load preview for ${unit.name}`);
+        setLoading(false);
         return;
       }
-
-      const data = (await res.json()) as { preview: TransferPreviewResultV2 };
-      setPreview(data.preview);
-    } catch {
-      setError("Failed to load transfer preview.");
-    } finally {
-      setLoading(false);
     }
+
+    // Build full preview
+    const fullPreview: TransferPreviewResultV2 = {
+      matched: totalMatched,
+      unmatched: totalUnmatched,
+      totalSourceTracks: totalSourceTracks,
+      duplicatesRemoved: duplicatesRemoved,
+      unavailableTracks: unavailableTracks,
+      unmatchedTracks: allUnmatchedTracks,
+      playlists: allPlaylists
+    };
+
+    setPreview(fullPreview);
+    setLoading(false);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -354,7 +420,14 @@ function TransferPageInner(): ReactElement {
               <span className="material-icons-round text-primary">sync</span>
             </div>
           </div>
-          <p className="text-zinc-500 text-sm font-bold">Preparing transfer preview...</p>
+          <p className="text-zinc-500 text-sm font-bold">
+            Preparing preview... ({previewProgress.current}/{previewProgress.total})
+          </p>
+          {previewProgress.currentName && (
+            <p className="text-zinc-400 text-xs mt-2">
+              {previewProgress.currentName}
+            </p>
+          )}
         </div>
       </div>
     );

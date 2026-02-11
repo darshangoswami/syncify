@@ -43,6 +43,7 @@ export interface TransferPreviewRequest {
   destinationProvider: OAuthProviderType;
   playlistIds?: string[];
   includeLiked?: boolean;
+  filterPlaylistId?: string;
 }
 
 export interface TransferPreviewUnmatchedTrack {

@@ -27,7 +27,8 @@ const previewRequestSchema = z.object({
   playlistIds: z.array(z.string().min(1)).optional(),
   includeLiked: z.boolean().optional(),
   playlistNames: z.record(z.string()).optional(),
-  allowDuplicates: z.boolean().optional()
+  allowDuplicates: z.boolean().optional(),
+  filterPlaylistId: z.string().optional()
 });
 
 function dedupeTracks(tracks: SourceTrack[]): SourceTrack[] {
@@ -75,7 +76,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     playlistIds: parsed.data.playlistIds || [],
     includeLiked: parsed.data.includeLiked ?? true,
     playlistNames: parsed.data.playlistNames,
-    allowDuplicates: parsed.data.allowDuplicates ?? false
+    allowDuplicates: parsed.data.allowDuplicates ?? false,
+    filterPlaylistId: parsed.data.filterPlaylistId
   };
 
   if (input.sourceProvider !== "spotify" || input.destinationProvider !== "tidal") {
@@ -104,18 +106,36 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   let totalItemsSeen = 0;
 
   try {
-    for (const playlistId of input.playlistIds || []) {
-      const result = await listSpotifyPlaylistTracks(sourceSession.session, playlistId);
-      totalItemsSeen += result.totalItemsSeen;
-      const tagged = result.tracks.map((t) => ({ ...t, playlistId }));
-      tracksByPlaylist.set(playlistId, tagged);
-    }
+    // When filterPlaylistId is provided, only fetch that specific playlist
+    if (input.filterPlaylistId) {
+      if (input.filterPlaylistId === "liked") {
+        if (input.includeLiked) {
+          const result = await listSpotifyLikedTracks(sourceSession.session);
+          totalItemsSeen += result.totalItemsSeen;
+          const tagged = result.tracks.map((t) => ({ ...t, playlistId: "liked" }));
+          tracksByPlaylist.set("liked", tagged);
+        }
+      } else if (input.playlistIds?.includes(input.filterPlaylistId)) {
+        const result = await listSpotifyPlaylistTracks(sourceSession.session, input.filterPlaylistId);
+        totalItemsSeen += result.totalItemsSeen;
+        const tagged = result.tracks.map((t) => ({ ...t, playlistId: input.filterPlaylistId }));
+        tracksByPlaylist.set(input.filterPlaylistId, tagged);
+      }
+    } else {
+      // Original logic: fetch all playlists
+      for (const playlistId of input.playlistIds || []) {
+        const result = await listSpotifyPlaylistTracks(sourceSession.session, playlistId);
+        totalItemsSeen += result.totalItemsSeen;
+        const tagged = result.tracks.map((t) => ({ ...t, playlistId }));
+        tracksByPlaylist.set(playlistId, tagged);
+      }
 
-    if (input.includeLiked) {
-      const result = await listSpotifyLikedTracks(sourceSession.session);
-      totalItemsSeen += result.totalItemsSeen;
-      const tagged = result.tracks.map((t) => ({ ...t, playlistId: "liked" }));
-      tracksByPlaylist.set("liked", tagged);
+      if (input.includeLiked) {
+        const result = await listSpotifyLikedTracks(sourceSession.session);
+        totalItemsSeen += result.totalItemsSeen;
+        const tagged = result.tracks.map((t) => ({ ...t, playlistId: "liked" }));
+        tracksByPlaylist.set("liked", tagged);
+      }
     }
   } catch (err) {
     logApiError({ requestId, method: "POST", path: "/api/transfer/preview", kind: "transfer_preview", error: err instanceof Error ? err.message : "Failed to load source tracks" });
