@@ -190,12 +190,6 @@ export default function RequestInvitePage(): ReactElement {
                 {status === "submitting" ? "Sending..." : "Request Invite"}
                 <span className="material-icons-round">arrow_forward</span>
               </button>
-
-              <p className="text-center text-xs text-zinc-600 font-medium px-8 leading-relaxed">
-                By requesting an invite, you agree to our{" "}
-                <span className="underline">Terms of Service</span> and{" "}
-                <span className="underline">Privacy Policy</span>.
-              </p>
             </form>
           ) : (
             <div className="space-y-6 text-center">

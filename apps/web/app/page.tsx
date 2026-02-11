@@ -52,18 +52,15 @@ export default function LandingPage(): ReactElement {
           <div className="space-y-4 relative z-10">
             {/* Request Invite Card */}
             <Link href="/request-invite" className="w-full text-left group block transition-transform active:scale-95">
-              <div className="bg-primary p-6 rounded-[32px] relative overflow-hidden flex flex-col h-48 justify-between shadow-xl shadow-primary/20">
+              <div className="bg-primary p-6 rounded-[32px] relative overflow-hidden flex flex-col justify-between shadow-xl shadow-primary/20">
                 <div className="absolute -top-4 -right-4 opacity-20 transform rotate-12">
                   <span className="material-icons-round text-[120px] text-white">auto_awesome</span>
                 </div>
-                <div>
-                  <span className="bg-white/20 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">
-                    Waitlist
-                  </span>
-                  <h3 className="text-2xl font-extrabold text-white mt-3">Request Invite</h3>
-                </div>
-                <div className="flex items-center justify-between">
-                  <p className="text-white/80 text-sm font-medium">Join 12k+ others</p>
+                <span className="self-start bg-white/20 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">
+                  Waitlist
+                </span>
+                <div className="flex items-center justify-between mt-3">
+                  <h3 className="text-2xl font-extrabold text-white">Request Invite</h3>
                   <div className="bg-white text-primary p-2 rounded-full flex items-center justify-center">
                     <span className="material-icons-round">arrow_forward</span>
                   </div>
@@ -79,7 +76,7 @@ export default function LandingPage(): ReactElement {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-white">Already Approved?</h3>
-                  <p className="text-zinc-500 text-sm mt-1">Sign in with your access code</p>
+                  <p className="text-zinc-500 text-sm mt-1">Sign in with your approved email</p>
                 </div>
                 <div className="flex items-center text-primary font-bold text-sm">
                   Enter Portal{" "}
