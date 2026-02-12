@@ -43,7 +43,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Invalid transfer chunk request." }, { status: 400 });
   }
 
-  const { playlistId, playlistName, trackIds } = parsed.data;
+  const { playlistId, trackIds } = parsed.data;
+  const playlistName = parsed.data.playlistName.trim() || `Playlist ${playlistId}`;
   let destinationPlaylistId = parsed.data.destinationPlaylistId || "";
   let added = 0;
   let skipped = 0;
