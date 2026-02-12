@@ -65,6 +65,38 @@ function TransferPageInner(): ReactElement {
   const [copied, setCopied] = useState(false);
   const cancelledRef = useRef(false);
   const chunkTimesRef = useRef<number[]>([]);
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+
+  /* ──── Wake Lock helpers ──── */
+  async function acquireWakeLock(): Promise<void> {
+    try {
+      if ("wakeLock" in navigator) {
+        wakeLockRef.current = await navigator.wakeLock.request("screen");
+      }
+    } catch { /* not supported or denied — fine */ }
+  }
+
+  async function releaseWakeLock(): Promise<void> {
+    try {
+      await wakeLockRef.current?.release();
+      wakeLockRef.current = null;
+    } catch { /* ignore */ }
+  }
+
+  // Re-acquire wake lock when tab becomes visible again (it's auto-released on hide)
+  useEffect(() => {
+    function handleVisibility(): void {
+      if (document.visibilityState === "visible" && (loading || phase === "progress")) {
+        void acquireWakeLock();
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibility);
+      void releaseWakeLock();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, phase]);
 
   /* ──── Parse params ──── */
   const playlistIdsParam = searchParams.get("playlists") || "";
@@ -84,6 +116,7 @@ function TransferPageInner(): ReactElement {
   const fetchPreview = useCallback(async () => {
     setLoading(true);
     setError("");
+    await acquireWakeLock();
 
     // Build list of units to fetch (liked + playlists)
     const fetchUnits: Array<{ id: string; name: string }> = [];
@@ -137,6 +170,7 @@ function TransferPageInner(): ReactElement {
           const data = (await res.json().catch(() => ({}))) as { error?: string };
           setError(data.error || `Preview failed for ${unit.name}`);
           setLoading(false);
+          void releaseWakeLock();
           return;
         }
 
@@ -155,6 +189,7 @@ function TransferPageInner(): ReactElement {
       } catch (err) {
         setError(`Failed to load preview for ${unit.name}`);
         setLoading(false);
+        void releaseWakeLock();
         return;
       }
     }
@@ -172,6 +207,7 @@ function TransferPageInner(): ReactElement {
 
     setPreview(fullPreview);
     setLoading(false);
+    void releaseWakeLock();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -223,6 +259,7 @@ function TransferPageInner(): ReactElement {
 
     cancelledRef.current = false;
     setPhase("progress");
+    await acquireWakeLock();
     chunkTimesRef.current = [];
 
     // Build ordered queue: playlist by playlist
@@ -352,6 +389,7 @@ function TransferPageInner(): ReactElement {
       cancelled: cancelledRef.current
     }));
     setPhase("results");
+    void releaseWakeLock();
   }
 
   function stopTransfer(): void {
@@ -428,6 +466,7 @@ function TransferPageInner(): ReactElement {
               {previewProgress.currentName}
             </p>
           )}
+          <p className="text-zinc-600 text-[11px] mt-6">Keep your screen on until the preview is ready.</p>
         </div>
       </div>
     );
@@ -733,7 +772,7 @@ function TransferPageInner(): ReactElement {
               Stop Transfer
             </button>
             <p className="text-center text-[11px] text-zinc-500 mt-4 px-6 leading-relaxed">
-              Don&apos;t close the app during the transfer process.
+              Keep your screen on and don&apos;t close the app during the transfer.
             </p>
           </div>
         </div>
