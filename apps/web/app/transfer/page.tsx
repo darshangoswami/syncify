@@ -231,13 +231,13 @@ function TransferPageInner(): ReactElement {
         }
 
         if (res.status === 401) {
-          setError("Your TIDAL session has expired. Please reconnect.");
+          setError((prev) => prev || "Your TIDAL session has expired. Please reconnect.");
           return null;
         }
 
         if (!res.ok) {
           const data = (await res.json().catch(() => ({}))) as { error?: string };
-          setError(data.error || `Chunk failed (${res.status})`);
+          setError((prev) => prev || data.error || `Chunk failed (${res.status})`);
           return null;
         }
 
@@ -305,7 +305,8 @@ function TransferPageInner(): ReactElement {
         chunks.push(playlist.tracks.slice(i, i + CHUNK_SIZE));
       }
 
-      for (const chunk of chunks) {
+      for (let ci = 0; ci < chunks.length; ci++) {
+        const chunk = chunks[ci]!;
         if (cancelledRef.current) break;
 
         // Update current track display
@@ -328,7 +329,32 @@ function TransferPageInner(): ReactElement {
         chunkTimesRef.current.push(Date.now() - chunkStart);
 
         if (!result) {
-          // Error already set by sendChunkWithRetry — mark remaining as failed
+          if (!destinationPlaylistId) {
+            // Playlist creation failed — skip all remaining chunks, retrying won't help
+            for (const rc of chunks.slice(ci)) {
+              failed += rc.length;
+              for (const t of rc) {
+                failedTracks.push({
+                  trackId: t.destinationTrackId,
+                  title: t.title,
+                  artist: t.artist,
+                  reason: "Playlist creation failed"
+                });
+              }
+              processedTracks += rc.length;
+            }
+            setProgress((prev) => ({
+              ...prev,
+              processedTracks,
+              added,
+              skipped,
+              failed,
+              failedTracks: [...failedTracks]
+            }));
+            break;
+          }
+
+          // Playlist exists but chunk failed — mark this chunk and continue
           failed += chunk.length;
           for (const t of chunk) {
             failedTracks.push({
@@ -473,7 +499,7 @@ function TransferPageInner(): ReactElement {
   }
 
   /* ──────────────────────────── Error ─────────────────────────── */
-  if (error && phase !== "progress") {
+  if (error && phase !== "progress" && phase !== "results") {
     return (
       <div className="fixed inset-0 flex justify-center">
         <div className="relative w-full max-w-100 h-full bg-background-dark flex flex-col items-center justify-center px-8 text-center">
