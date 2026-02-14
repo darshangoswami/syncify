@@ -65,7 +65,7 @@ export default function DonePage(): ReactElement {
             {/* Buy me a coffee */}
             <a
               className="group relative flex items-center gap-3 px-6 py-2 transition-transform hover:scale-105 active:scale-95 hover:rotate-2"
-              href="#"
+              href="https://ko-fi.com/darshangoswami"
               rel="noopener noreferrer"
               target="_blank"
             >
