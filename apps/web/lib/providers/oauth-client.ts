@@ -91,3 +91,55 @@ export async function exchangeAuthorizationCode(input: {
     refreshToken: parsed.data.refresh_token
   };
 }
+
+export async function exchangeRefreshToken(input: {
+  tokenUrl: string;
+  clientId: string;
+  clientSecret?: string;
+  refreshToken: string;
+}): Promise<OAuthTokenSet> {
+  const body = new URLSearchParams({
+    grant_type: "refresh_token",
+    refresh_token: input.refreshToken,
+    client_id: input.clientId
+  });
+  if (input.clientSecret) {
+    body.set("client_secret", input.clientSecret);
+  }
+
+  const response = await fetch(input.tokenUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: body.toString()
+  });
+
+  let payload: unknown = null;
+  try {
+    payload = await response.json();
+  } catch {
+    payload = null;
+  }
+
+  if (!response.ok) {
+    const detail =
+      payload && typeof payload === "object" && "error_description" in payload
+        ? String((payload as { error_description?: unknown }).error_description)
+        : `status ${response.status}`;
+    throw new OAuthTokenExchangeError(`OAuth token refresh failed: ${detail}`, response.status);
+  }
+
+  const parsed = tokenResponseSchema.safeParse(payload);
+  if (!parsed.success) {
+    throw new OAuthTokenExchangeError("OAuth token refresh response format invalid.", 502);
+  }
+
+  return {
+    accessToken: parsed.data.access_token,
+    tokenType: parsed.data.token_type || "Bearer",
+    scope: parsed.data.scope,
+    expiresIn: asExpiresIn(parsed.data.expires_in),
+    refreshToken: parsed.data.refresh_token || input.refreshToken
+  };
+}

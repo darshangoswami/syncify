@@ -7,7 +7,9 @@ import { isApprovedEmail } from "@/lib/invite";
 import {
   getProviderSessionCookieName,
   readProviderSessionCookieValue,
-  type ProviderSession
+  refreshProviderSession,
+  type ProviderSession,
+  type RefreshResult
 } from "@/lib/provider-session";
 
 function getApprovedEmailFromRequest(request: NextRequest): string | null {
@@ -48,12 +50,13 @@ export function requireApprovedEmail(request: NextRequest):
   return { ok: true, approvedEmail };
 }
 
-export function requireProviderSession(
+export async function requireProviderSession(
   request: NextRequest,
   provider: OAuthProvider
-):
-  | { ok: true; session: ProviderSession }
-  | { ok: false; response: NextResponse } {
+): Promise<
+  | { ok: true; session: ProviderSession; wasRefreshed: boolean }
+  | { ok: false; response: NextResponse }
+> {
   const cookieValue = request.cookies.get(getProviderSessionCookieName(provider))?.value;
   if (!cookieValue) {
     return {
@@ -80,7 +83,10 @@ export function requireProviderSession(
     };
   }
 
-  if (session.expiresAt <= Date.now()) {
+  let result: RefreshResult;
+  try {
+    result = await refreshProviderSession(session);
+  } catch {
     return {
       ok: false,
       response: NextResponse.json(
@@ -92,5 +98,5 @@ export function requireProviderSession(
     };
   }
 
-  return { ok: true, session };
+  return { ok: true, session: result.session, wasRefreshed: result.wasRefreshed };
 }

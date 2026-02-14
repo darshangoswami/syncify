@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { requireApprovedEmail, requireProviderSession } from "@/lib/auth-gate";
 import { logApiEvent, logApiError } from "@/lib/logging";
+import { applyRefreshedSessionCookie } from "@/lib/provider-session";
 import { listSpotifyPlaylists } from "@/lib/providers/spotify-catalog";
 import { isOAuthProvider } from "@/lib/providers";
 import { getRequestId } from "@/lib/request";
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: "Source playlists are only available for Spotify in this release." }, { status: 400 });
   }
 
-  const session = requireProviderSession(request, sourceProvider);
+  const session = await requireProviderSession(request, sourceProvider);
   if (!session.ok) {
     return session.response;
   }
@@ -35,10 +36,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       durationMs: Date.now() - startedAt, kind: "source_playlists",
       detail: `count=${playlists.length}`
     });
-    return NextResponse.json({
+    const response = NextResponse.json({
       sourceProvider,
       playlists
     });
+    applyRefreshedSessionCookie(response, session);
+    return response;
   } catch (err) {
     logApiError({ requestId, method: "GET", path: "/api/source/playlists", kind: "source_playlists", error: err instanceof Error ? err.message : "Failed to load playlists" });
     return NextResponse.json({ error: "Failed to load source playlists." }, { status: 502 });

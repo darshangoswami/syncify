@@ -4,7 +4,7 @@ import type {
   OAuthTokenExchangeRequest
 } from "@spotify-xyz/shared";
 import { getTidalOAuthConfig } from "@/lib/env";
-import { exchangeAuthorizationCode } from "@/lib/providers/oauth-client";
+import { exchangeAuthorizationCode, exchangeRefreshToken } from "@/lib/providers/oauth-client";
 
 function requireTidalConfig(): {
   clientId: string;
@@ -55,8 +55,19 @@ async function exchangeCodeForToken(input: OAuthTokenExchangeRequest) {
   });
 }
 
+async function refreshAccessToken(refreshToken: string) {
+  const config = requireTidalConfig();
+  return exchangeRefreshToken({
+    tokenUrl: config.tokenUrl,
+    clientId: config.clientId,
+    clientSecret: config.clientSecret || undefined,
+    refreshToken
+  });
+}
+
 export const tidalAdapter: OAuthProviderAdapter = {
   provider: "tidal",
   buildAuthorizationUrl,
-  exchangeCodeForToken
+  exchangeCodeForToken,
+  refreshAccessToken
 };

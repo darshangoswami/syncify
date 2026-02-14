@@ -4,7 +4,7 @@ import type {
   OAuthTokenExchangeRequest
 } from "@spotify-xyz/shared";
 import { getSpotifyOAuthConfig } from "@/lib/env";
-import { exchangeAuthorizationCode } from "@/lib/providers/oauth-client";
+import { exchangeAuthorizationCode, exchangeRefreshToken } from "@/lib/providers/oauth-client";
 
 function requireSpotifyConfig(): {
   clientId: string;
@@ -44,8 +44,19 @@ async function exchangeCodeForToken(input: OAuthTokenExchangeRequest) {
   });
 }
 
+async function refreshAccessToken(refreshToken: string) {
+  const config = requireSpotifyConfig();
+  return exchangeRefreshToken({
+    tokenUrl: config.tokenUrl,
+    clientId: config.clientId,
+    clientSecret: config.clientSecret,
+    refreshToken
+  });
+}
+
 export const spotifyAdapter: OAuthProviderAdapter = {
   provider: "spotify",
   buildAuthorizationUrl,
-  exchangeCodeForToken
+  exchangeCodeForToken,
+  refreshAccessToken
 };

@@ -1,4 +1,7 @@
 import type { OAuthProvider, OAuthTokenSet } from "@spotify-xyz/shared";
+import type { NextResponse } from "next/server";
+import { getOAuthSessionSecret } from "@/lib/env";
+import { getOAuthProviderAdapter } from "@/lib/providers";
 import { createSignedPayload, readSignedPayload } from "@/lib/signed-payload";
 
 const MAX_SESSION_TTL_SECONDS = 60 * 60 * 24;
@@ -81,4 +84,46 @@ export function readProviderSessionCookieValue(value: string, secret: string): P
   }
 
   return decodeSession(payload);
+}
+
+const REFRESH_WINDOW_MS = 5 * 60 * 1000;
+
+export type RefreshResult =
+  | { session: ProviderSession; wasRefreshed: true }
+  | { session: ProviderSession; wasRefreshed: false };
+
+export async function refreshProviderSession(session: ProviderSession): Promise<RefreshResult> {
+  const timeUntilExpiry = session.expiresAt - Date.now();
+
+  if (timeUntilExpiry > REFRESH_WINDOW_MS) {
+    return { session, wasRefreshed: false };
+  }
+
+  if (!session.refreshToken) {
+    throw new Error(`No refresh token available for provider: ${session.provider}`);
+  }
+
+  const adapter = getOAuthProviderAdapter(session.provider);
+  const tokenSet = await adapter.refreshAccessToken(session.refreshToken);
+  const refreshed = createProviderSession(session.provider, tokenSet);
+
+  return { session: refreshed, wasRefreshed: true };
+}
+
+export function applyRefreshedSessionCookie(
+  response: NextResponse,
+  result: { session: ProviderSession; wasRefreshed: boolean }
+): void {
+  if (!result.wasRefreshed) return;
+
+  const session = result.session;
+  response.cookies.set({
+    name: getProviderSessionCookieName(session.provider),
+    value: createProviderSessionCookieValue(session, getOAuthSessionSecret()),
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: getProviderSessionCookieMaxAge(session)
+  });
 }

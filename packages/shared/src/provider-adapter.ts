@@ -24,4 +24,5 @@ export interface OAuthProviderAdapter {
   provider: OAuthProvider;
   buildAuthorizationUrl(input: OAuthAuthorizationRequest): URL;
   exchangeCodeForToken(input: OAuthTokenExchangeRequest): Promise<OAuthTokenSet>;
+  refreshAccessToken(refreshToken: string): Promise<OAuthTokenSet>;
 }
