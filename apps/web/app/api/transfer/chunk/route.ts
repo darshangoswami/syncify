@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { requireApprovedEmail, requireProviderSession } from "@/lib/auth-gate";
 import { logApiEvent, logApiError } from "@/lib/logging";
+import { applyRefreshedSessionCookie } from "@/lib/provider-session";
 import {
   createTidalPlaylist,
   addTracksToTidalPlaylist,
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return approval.response;
   }
 
-  const tidalSession = requireProviderSession(request, "tidal");
+  const tidalSession = await requireProviderSession(request, "tidal");
   if (!tidalSession.ok) {
     return tidalSession.response;
   }
@@ -119,7 +120,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     detail: `playlist=${playlistId} added=${added} failed=${failed} tracks=${trackIds.length}`
   });
 
-  return NextResponse.json({
+  const response = NextResponse.json({
     ok: true,
     result: {
       added,
@@ -129,4 +130,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       destinationPlaylistId
     }
   });
+  applyRefreshedSessionCookie(response, tidalSession);
+  return response;
 }

@@ -10,6 +10,7 @@ import type {
 } from "@spotify-xyz/shared";
 import { requireApprovedEmail, requireProviderSession } from "@/lib/auth-gate";
 import { logApiEvent, logApiError } from "@/lib/logging";
+import { applyRefreshedSessionCookie } from "@/lib/provider-session";
 import {
   listSpotifyLikedTracks,
   listSpotifyPlaylistTracks
@@ -87,12 +88,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const sourceSession = requireProviderSession(request, input.sourceProvider);
+  const sourceSession = await requireProviderSession(request, input.sourceProvider);
   if (!sourceSession.ok) {
     return sourceSession.response;
   }
 
-  const destinationSession = requireProviderSession(request, input.destinationProvider);
+  const destinationSession = await requireProviderSession(request, input.destinationProvider);
   if (!destinationSession.ok) {
     return destinationSession.response;
   }
@@ -270,8 +271,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     detail: `matched=${totalMatched} unmatched=${unmatchedTracks.length} total=${uniqueTracks.length}`
   });
 
-  return NextResponse.json({
+  const response = NextResponse.json({
     ok: true,
     preview
   });
+  applyRefreshedSessionCookie(response, sourceSession);
+  applyRefreshedSessionCookie(response, destinationSession);
+  return response;
 }
