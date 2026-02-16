@@ -484,8 +484,21 @@ function TransferPageInner(): ReactElement {
   const estimatedMs = remainingChunks * avgChunkTime;
   const estimatedMinutes = Math.max(1, Math.ceil(estimatedMs / 60000));
 
-  const matchRate = preview && preview.totalSourceTracks > 0
-    ? ((preview.matched / preview.totalSourceTracks) * 100).toFixed(1)
+  // Effective values accounting for skipped duplicate playlists
+  const duplicatePlaylistIds = new Set(existingPlaylists.map((ep) => ep.sourcePlaylistId));
+  const effectivePlaylists = preview
+    ? (allowDuplicatePlaylists
+        ? preview.playlists
+        : preview.playlists.filter((p) => !duplicatePlaylistIds.has(p.playlistId)))
+    : [];
+  const effectiveMatched = effectivePlaylists.reduce((sum, p) => sum + p.matchedCount, 0);
+  const effectiveTotal = effectivePlaylists.reduce((sum, p) => sum + p.totalTracks, 0);
+  const skippedPlaylistTrackCount = preview
+    ? preview.matched - effectiveMatched
+    : 0;
+
+  const matchRate = effectiveTotal > 0
+    ? ((effectiveMatched / effectiveTotal) * 100).toFixed(1)
     : "0";
 
   /* ──── Build unmatched report text ──── */
@@ -569,14 +582,6 @@ function TransferPageInner(): ReactElement {
   /*                    PHASE 1: PREVIEW                          */
   /* ══════════════════════════════════════════════════════════════ */
   if (phase === "preview" && preview) {
-    // Compute effective playlists/counts based on duplicate playlist checkbox
-    const duplicatePlaylistIds = new Set(existingPlaylists.map((ep) => ep.sourcePlaylistId));
-    const effectivePlaylists = allowDuplicatePlaylists
-      ? preview.playlists
-      : preview.playlists.filter((p) => !duplicatePlaylistIds.has(p.playlistId));
-    const effectiveMatched = effectivePlaylists.reduce((sum, p) => sum + p.matchedCount, 0);
-    const effectiveTotal = effectivePlaylists.reduce((sum, p) => sum + p.totalTracks, 0);
-
     const matchedPercent = effectiveTotal > 0
       ? Math.round((effectiveMatched / effectiveTotal) * 100)
       : 0;
@@ -938,17 +943,18 @@ function TransferPageInner(): ReactElement {
           {/* Scrollable content */}
           <div className="flex-1 overflow-y-auto px-6 pb-48 space-y-4">
             {/* Stats grid */}
-            {preview && (preview.duplicatesRemoved > 0 || preview.unavailableTracks > 0) && (
+            {preview && (preview.duplicatesRemoved > 0 || preview.unavailableTracks > 0 || skippedPlaylistTrackCount > 0) && (
               <p className="text-center text-xs text-zinc-500">
                 {(preview.totalSourceTracks + preview.duplicatesRemoved + preview.unavailableTracks).toLocaleString()} total songs
                 {preview.unavailableTracks > 0 && ` · ${preview.unavailableTracks.toLocaleString()} unavailable`}
-                {preview.duplicatesRemoved > 0 && !allowDuplicates && ` · ${preview.duplicatesRemoved.toLocaleString()} duplicates removed`}
+                {preview.duplicatesRemoved > 0 && !allowDuplicates && ` · ${preview.duplicatesRemoved.toLocaleString()} duplicate tracks removed`}
+                {skippedPlaylistTrackCount > 0 && ` · ${skippedPlaylistTrackCount.toLocaleString()} in duplicate playlists`}
               </p>
             )}
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-[#5865F2] p-5 rounded-3xl text-white relative overflow-hidden">
                 <span className="text-xs font-bold uppercase tracking-widest opacity-80">{allowDuplicates ? "Total Tracks" : "Unique Tracks"}</span>
-                <div className="text-4xl font-black mt-1">{preview?.totalSourceTracks.toLocaleString() || 0}</div>
+                <div className="text-4xl font-black mt-1">{effectiveTotal.toLocaleString()}</div>
                 <span className="material-icons-round absolute -bottom-2 -right-2 text-6xl opacity-20 rotate-12">library_music</span>
               </div>
               <div className="bg-primary p-5 rounded-3xl text-black relative overflow-hidden">
