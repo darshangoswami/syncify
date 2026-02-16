@@ -82,6 +82,13 @@ export interface TransferPreviewResultV2 extends TransferPreviewResult {
   unavailableTracks: number;
 }
 
+export interface TidalExistingPlaylist {
+  tidalPlaylistId: string;
+  tidalPlaylistName: string;
+  sourcePlaylistId: string;
+  sourcePlaylistName: string;
+}
+
 export interface TransferChunkRequest {
   destinationProvider: "tidal";
   playlistId: string;

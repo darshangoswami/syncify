@@ -1,6 +1,7 @@
 "use client";
 
 import type {
+  TidalExistingPlaylist,
   TransferChunkResult,
   TransferMatchedTrack,
   TransferPreviewPlaylistBreakdown,
@@ -63,6 +64,9 @@ function TransferPageInner(): ReactElement {
     cancelled: false
   });
   const [copied, setCopied] = useState(false);
+  const [tidalPlaylists, setTidalPlaylists] = useState<Array<{ id: string; name: string }>>([]);
+  const [existingPlaylists, setExistingPlaylists] = useState<TidalExistingPlaylist[]>([]);
+  const [allowDuplicatePlaylists, setAllowDuplicatePlaylists] = useState(false);
   const cancelledRef = useRef(false);
   const chunkTimesRef = useRef<number[]>([]);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
@@ -131,6 +135,19 @@ function TransferPageInner(): ReactElement {
     }
 
     setPreviewProgress({ current: 0, total: fetchUnits.length, currentName: "" });
+
+    // Fetch existing TIDAL playlists for duplicate detection
+    let fetchedTidalPlaylists: Array<{ id: string; name: string }> = [];
+    try {
+      const tidalRes = await fetch("/api/transfer/tidal-playlists");
+      if (tidalRes.ok) {
+        const tidalData = (await tidalRes.json()) as { playlists: Array<{ id: string; name: string }> };
+        fetchedTidalPlaylists = tidalData.playlists || [];
+        setTidalPlaylists(fetchedTidalPlaylists);
+      }
+    } catch {
+      // Non-critical — continue without duplicate detection
+    }
 
     // Aggregate results from each unit
     let totalMatched = 0;
@@ -205,6 +222,30 @@ function TransferPageInner(): ReactElement {
       playlists: allPlaylists
     };
 
+    // Match source playlists against existing TIDAL playlists (case-insensitive name match)
+    if (fetchedTidalPlaylists.length > 0) {
+      const tidalNameMap = new Map<string, { id: string; name: string }>();
+      for (const tp of fetchedTidalPlaylists) {
+        tidalNameMap.set(tp.name.toLowerCase(), tp);
+      }
+
+      const matched: TidalExistingPlaylist[] = [];
+      for (const p of allPlaylists) {
+        // Skip Liked Songs — it's favorites, not a named playlist
+        if (p.playlistId === "liked") continue;
+        const tidalMatch = tidalNameMap.get(p.playlistName.toLowerCase());
+        if (tidalMatch) {
+          matched.push({
+            tidalPlaylistId: tidalMatch.id,
+            tidalPlaylistName: tidalMatch.name,
+            sourcePlaylistId: p.playlistId,
+            sourcePlaylistName: p.playlistName
+          });
+        }
+      }
+      setExistingPlaylists(matched);
+    }
+
     setPreview(fullPreview);
     setLoading(false);
     void releaseWakeLock();
@@ -269,11 +310,18 @@ function TransferPageInner(): ReactElement {
       tracks: TransferMatchedTrack[];
     }
 
-    const queue: PlaylistQueue[] = preview.playlists.map((p) => ({
-      playlistId: p.playlistId,
-      playlistName: p.playlistName,
-      tracks: p.matchedTracks
-    }));
+    // Filter out playlists that already exist on TIDAL (unless user opted in)
+    const excludedIds = !allowDuplicatePlaylists
+      ? new Set(existingPlaylists.map((ep) => ep.sourcePlaylistId))
+      : new Set<string>();
+
+    const queue: PlaylistQueue[] = preview.playlists
+      .filter((p) => !excludedIds.has(p.playlistId))
+      .map((p) => ({
+        playlistId: p.playlistId,
+        playlistName: p.playlistName,
+        tracks: p.matchedTracks
+      }));
 
     const totalTracks = queue.reduce((sum, p) => sum + p.tracks.length, 0);
     let processedTracks = 0;
@@ -521,8 +569,16 @@ function TransferPageInner(): ReactElement {
   /*                    PHASE 1: PREVIEW                          */
   /* ══════════════════════════════════════════════════════════════ */
   if (phase === "preview" && preview) {
-    const matchedPercent = preview.totalSourceTracks > 0
-      ? Math.round((preview.matched / preview.totalSourceTracks) * 100)
+    // Compute effective playlists/counts based on duplicate playlist checkbox
+    const duplicatePlaylistIds = new Set(existingPlaylists.map((ep) => ep.sourcePlaylistId));
+    const effectivePlaylists = allowDuplicatePlaylists
+      ? preview.playlists
+      : preview.playlists.filter((p) => !duplicatePlaylistIds.has(p.playlistId));
+    const effectiveMatched = effectivePlaylists.reduce((sum, p) => sum + p.matchedCount, 0);
+    const effectiveTotal = effectivePlaylists.reduce((sum, p) => sum + p.totalTracks, 0);
+
+    const matchedPercent = effectiveTotal > 0
+      ? Math.round((effectiveMatched / effectiveTotal) * 100)
       : 0;
 
     return (
@@ -553,7 +609,7 @@ function TransferPageInner(): ReactElement {
               <div className="relative z-10 flex flex-col items-center py-4">
                 <span className="text-xs font-bold uppercase tracking-widest opacity-70 mb-2">Ready to move</span>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-6xl font-black">{preview.matched.toLocaleString()}</span>
+                  <span className="text-6xl font-black">{effectiveMatched.toLocaleString()}</span>
                   <span className="text-xl font-bold">Songs</span>
                 </div>
                 <div className="w-full h-3 bg-black/10 rounded-full mt-8 relative overflow-hidden">
@@ -562,11 +618,11 @@ function TransferPageInner(): ReactElement {
                 <div className="flex justify-between w-full mt-3 text-sm font-bold opacity-80">
                   <div className="flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-black/60" />
-                    {preview.matched} Matched
+                    {effectiveMatched} Matched
                   </div>
                   <div className="flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-white/60" />
-                    {preview.unmatched} Unmatched
+                    {effectiveTotal - effectiveMatched} Unmatched
                   </div>
                 </div>
               </div>
@@ -604,7 +660,7 @@ function TransferPageInner(): ReactElement {
             {/* Playlists breakdown */}
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-bold">Playlists breakdown</h2>
-              <span className="text-sm text-zinc-500 font-semibold">{preview.playlists.length} total</span>
+              <span className="text-sm text-zinc-500 font-semibold">{effectivePlaylists.length} total</span>
             </div>
 
             <div className="space-y-3">
@@ -615,11 +671,12 @@ function TransferPageInner(): ReactElement {
                 const isLiked = playlist.playlistId === "liked";
                 const color = isLiked ? "bg-[#7C3AED]" : iconColors[idx % iconColors.length];
                 const icon = isLiked ? "favorite" : iconNames[idx % iconNames.length];
+                const isExcluded = !allowDuplicatePlaylists && duplicatePlaylistIds.has(playlist.playlistId);
 
                 return (
                   <div
                     key={playlist.playlistId}
-                    className="p-4 bg-zinc-900 rounded-3xl flex items-center gap-4 group hover:ring-2 ring-primary transition-all"
+                    className={`p-4 bg-zinc-900 rounded-3xl flex items-center gap-4 group hover:ring-2 ring-primary transition-all ${isExcluded ? "opacity-40" : ""}`}
                   >
                     <div className={`w-14 h-14 ${color} rounded-2xl flex items-center justify-center shadow-lg transform group-hover:rotate-3 transition-transform`}>
                       <span className="material-icons-round text-white text-3xl">{icon}</span>
@@ -629,7 +686,12 @@ function TransferPageInner(): ReactElement {
                       <p className="text-sm text-zinc-500">{playlist.matchedCount} songs matched</p>
                     </div>
                     <div className="flex flex-col items-end">
-                      {playlist.unmatchedCount > 0 ? (
+                      {isExcluded ? (
+                        <>
+                          <span className="text-amber-500 font-bold">Skipped</span>
+                          <span className="text-[10px] uppercase font-bold text-zinc-400">Already on TIDAL</span>
+                        </>
+                      ) : playlist.unmatchedCount > 0 ? (
                         <>
                           <span className="text-yellow-500 font-bold">{playlist.unmatchedCount} unmatched</span>
                           <span className="text-[10px] uppercase font-bold text-zinc-400">Review needed</span>
@@ -647,6 +709,33 @@ function TransferPageInner(): ReactElement {
                 );
               })}
             </div>
+
+            {/* Already on TIDAL */}
+            {existingPlaylists.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold">Already on TIDAL</h2>
+                  <span className="text-sm text-zinc-500 font-semibold">{existingPlaylists.length} found</span>
+                </div>
+                <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl space-y-3">
+                  {existingPlaylists.map((ep) => (
+                    <div key={ep.sourcePlaylistId} className="flex items-center gap-3">
+                      <span className="material-icons-round text-amber-500 text-lg">playlist_play</span>
+                      <span className="text-sm text-amber-300 font-medium">{ep.sourcePlaylistName}</span>
+                    </div>
+                  ))}
+                </div>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={allowDuplicatePlaylists}
+                    onChange={(e) => setAllowDuplicatePlaylists(e.target.checked)}
+                    className="w-5 h-5 rounded border-zinc-600 bg-zinc-800 text-primary accent-primary"
+                  />
+                  <span className="text-sm text-zinc-300 font-medium">Allow duplicate playlists</span>
+                </label>
+              </div>
+            )}
 
             {/* Warning for unmatched */}
             {preview.unmatched > 0 && (

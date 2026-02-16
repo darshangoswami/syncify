@@ -58,7 +58,7 @@ async function postWithRetry(
 
 let cachedUserId: string | null = null;
 
-async function getTidalUserId(session: ProviderSession): Promise<string> {
+export async function getTidalUserId(session: ProviderSession): Promise<string> {
   if (cachedUserId) return cachedUserId;
 
   const config = getTidalApiConfig();

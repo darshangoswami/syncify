@@ -1,6 +1,7 @@
 import type { SourceTrack } from "@spotify-xyz/shared";
 import type { ProviderSession } from "@/lib/provider-session";
 import { getTidalApiConfig } from "@/lib/env";
+import { getTidalUserId } from "@/lib/providers/tidal-write";
 
 class TidalApiError extends Error {
   readonly status: number;
@@ -316,4 +317,60 @@ export async function searchTidalTracks(
   }
 
   return tracks;
+}
+
+const MAX_PLAYLIST_PAGES = 5;
+
+/**
+ * Fetch the authenticated user's TIDAL playlists.
+ * Uses GET /playlists?filter[owners.id]={userId} with cursor-based pagination.
+ * Returns an array of { id, name } or an empty array on failure.
+ */
+export async function listTidalUserPlaylists(
+  session: ProviderSession
+): Promise<Array<{ id: string; name: string }>> {
+  try {
+    const config = getTidalApiConfig();
+    const userId = await getTidalUserId(session);
+    const playlists: Array<{ id: string; name: string }> = [];
+    let cursor: string | null = null;
+
+    for (let page = 0; page < MAX_PLAYLIST_PAGES; page++) {
+      const url = new URL(`${config.apiBaseUrl}/playlists`);
+      url.searchParams.set("filter[owners.id]", userId);
+      url.searchParams.set("countryCode", config.countryCode);
+      if (cursor) {
+        url.searchParams.set("page[cursor]", cursor);
+      }
+
+      const { payload } = await fetchWithRetry(url.toString(), session);
+      const root = payload as {
+        data?: unknown[];
+        links?: { meta?: { nextCursor?: string } };
+      } | null;
+      const items = Array.isArray(root?.data) ? root.data : [];
+
+      for (const item of items) {
+        if (!item || typeof item !== "object") continue;
+        const node = item as { id?: unknown; attributes?: { name?: unknown } };
+        const id = node.id != null ? String(node.id) : null;
+        const name = getString(node.attributes?.name);
+        if (id && name) {
+          playlists.push({ id, name });
+        }
+      }
+
+      // Check for next page cursor
+      const nextCursor = root?.links?.meta?.nextCursor;
+      if (!nextCursor || items.length === 0) break;
+      cursor = nextCursor;
+
+      // Safety cap
+      if (playlists.length >= 500) break;
+    }
+
+    return playlists;
+  } catch {
+    return [];
+  }
 }
