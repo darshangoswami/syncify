@@ -9,15 +9,16 @@ Monorepo for a private-beta music transfer app.
 
 ## Quick start
 
-1. Install dependencies:
+1. Use Node.js `v20.20.0`.
+2. Install dependencies:
    - `corepack enable`
    - `corepack prepare pnpm@9.15.0 --activate`
    - `pnpm install`
-2. Copy env file:
+3. Copy env file:
    - `cp apps/web/.env.example apps/web/.env.local`
-3. Run app:
+4. Run app:
    - `pnpm dev`
-4. Run tests:
+5. Run tests:
    - `pnpm test`
 
 ## Invite + approval flow
