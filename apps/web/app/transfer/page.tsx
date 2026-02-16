@@ -64,9 +64,8 @@ function TransferPageInner(): ReactElement {
     cancelled: false
   });
   const [copied, setCopied] = useState(false);
-  const [tidalPlaylists, setTidalPlaylists] = useState<Array<{ id: string; name: string }>>([]);
   const [existingPlaylists, setExistingPlaylists] = useState<TidalExistingPlaylist[]>([]);
-  const [allowDuplicatePlaylists, setAllowDuplicatePlaylists] = useState(false);
+  const [allowDuplicatePlaylists, setAllowDuplicatePlaylists] = useState(true);
   const cancelledRef = useRef(false);
   const chunkTimesRef = useRef<number[]>([]);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
@@ -116,6 +115,10 @@ function TransferPageInner(): ReactElement {
     /* ignore */
   }
 
+  function normalizePlaylistName(name: string): string {
+    return name.trim().replace(/\s+/g, " ").toLowerCase();
+  }
+
   /* ──── Fetch preview ──── */
   const fetchPreview = useCallback(async () => {
     setLoading(true);
@@ -143,7 +146,6 @@ function TransferPageInner(): ReactElement {
       if (tidalRes.ok) {
         const tidalData = (await tidalRes.json()) as { playlists: Array<{ id: string; name: string }> };
         fetchedTidalPlaylists = tidalData.playlists || [];
-        setTidalPlaylists(fetchedTidalPlaylists);
       }
     } catch {
       // Non-critical — continue without duplicate detection
@@ -226,14 +228,14 @@ function TransferPageInner(): ReactElement {
     if (fetchedTidalPlaylists.length > 0) {
       const tidalNameMap = new Map<string, { id: string; name: string }>();
       for (const tp of fetchedTidalPlaylists) {
-        tidalNameMap.set(tp.name.toLowerCase(), tp);
+        tidalNameMap.set(normalizePlaylistName(tp.name), tp);
       }
 
       const matched: TidalExistingPlaylist[] = [];
       for (const p of allPlaylists) {
         // Skip Liked Songs — it's favorites, not a named playlist
         if (p.playlistId === "liked") continue;
-        const tidalMatch = tidalNameMap.get(p.playlistName.toLowerCase());
+        const tidalMatch = tidalNameMap.get(normalizePlaylistName(p.playlistName));
         if (tidalMatch) {
           matched.push({
             tidalPlaylistId: tidalMatch.id,
@@ -244,6 +246,8 @@ function TransferPageInner(): ReactElement {
         }
       }
       setExistingPlaylists(matched);
+    } else {
+      setExistingPlaylists([]);
     }
 
     setPreview(fullPreview);
@@ -493,8 +497,13 @@ function TransferPageInner(): ReactElement {
     : [];
   const effectiveMatched = effectivePlaylists.reduce((sum, p) => sum + p.matchedCount, 0);
   const effectiveTotal = effectivePlaylists.reduce((sum, p) => sum + p.totalTracks, 0);
+  const effectiveUnmatched = effectivePlaylists.reduce((sum, p) => sum + p.unmatchedCount, 0);
+  const effectivePlaylistIds = new Set(effectivePlaylists.map((playlist) => playlist.playlistId));
+  const effectiveUnmatchedTracks = preview
+    ? preview.unmatchedTracks.filter((track) => effectivePlaylistIds.has(track.playlistId))
+    : [];
   const skippedPlaylistTrackCount = preview
-    ? preview.matched - effectiveMatched
+    ? Math.max(0, preview.totalSourceTracks - effectiveTotal)
     : 0;
 
   const matchRate = effectiveTotal > 0
@@ -504,9 +513,9 @@ function TransferPageInner(): ReactElement {
   /* ──── Build unmatched report text ──── */
   function buildUnmatchedText(): string {
     const lines: string[] = [];
-    if (preview?.unmatchedTracks.length) {
+    if (effectiveUnmatchedTracks.length) {
       lines.push("UNMATCHED TRACKS:");
-      for (const t of preview.unmatchedTracks) {
+      for (const t of effectiveUnmatchedTracks) {
         lines.push(`  ${t.title} - ${t.artist} (${t.reason === "no_destination_match" ? "no match found" : "lookup failed"})`);
       }
     }
@@ -634,12 +643,13 @@ function TransferPageInner(): ReactElement {
             </section>
 
             {/* Track accounting note */}
-            {(preview.duplicatesRemoved > 0 || preview.unavailableTracks > 0 || allowDuplicates) && (
+            {(preview.duplicatesRemoved > 0 || preview.unavailableTracks > 0 || allowDuplicates || skippedPlaylistTrackCount > 0) && (
               <p className="text-center text-xs text-zinc-500 -mt-3">
                 {(preview.totalSourceTracks + preview.duplicatesRemoved + preview.unavailableTracks).toLocaleString()} total
                 {preview.unavailableTracks > 0 && ` · ${preview.unavailableTracks.toLocaleString()} unavailable`}
                 {preview.duplicatesRemoved > 0 && !allowDuplicates && ` · ${preview.duplicatesRemoved.toLocaleString()} duplicates removed`}
                 {allowDuplicates && " · duplicates included"}
+                {skippedPlaylistTrackCount > 0 && ` · ${skippedPlaylistTrackCount.toLocaleString()} in skipped name-matches`}
               </p>
             )}
 
@@ -737,17 +747,20 @@ function TransferPageInner(): ReactElement {
                     onChange={(e) => setAllowDuplicatePlaylists(e.target.checked)}
                     className="w-5 h-5 rounded border-zinc-600 bg-zinc-800 text-primary accent-primary"
                   />
-                  <span className="text-sm text-zinc-300 font-medium">Allow duplicate playlists</span>
+                  <span className="text-sm text-zinc-300 font-medium">Create playlists even if names already exist</span>
                 </label>
+                <p className="text-xs text-zinc-500">
+                  Name matches are heuristic only. Turn this off only if you want to skip same-name playlists.
+                </p>
               </div>
             )}
 
             {/* Warning for unmatched */}
-            {preview.unmatched > 0 && (
+            {effectiveUnmatched > 0 && (
               <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-2xl flex gap-3 items-start">
                 <span className="material-icons-round text-yellow-500 mt-0.5">warning</span>
                 <p className="text-sm text-yellow-400 leading-relaxed font-medium">
-                  {preview.unmatched} songs couldn&apos;t be automatically matched. You can review them after the transfer is complete.
+                  {effectiveUnmatched} songs couldn&apos;t be automatically matched. You can review them after the transfer is complete.
                 </p>
               </div>
             )}
@@ -948,7 +961,7 @@ function TransferPageInner(): ReactElement {
                 {(preview.totalSourceTracks + preview.duplicatesRemoved + preview.unavailableTracks).toLocaleString()} total songs
                 {preview.unavailableTracks > 0 && ` · ${preview.unavailableTracks.toLocaleString()} unavailable`}
                 {preview.duplicatesRemoved > 0 && !allowDuplicates && ` · ${preview.duplicatesRemoved.toLocaleString()} duplicate tracks removed`}
-                {skippedPlaylistTrackCount > 0 && ` · ${skippedPlaylistTrackCount.toLocaleString()} in duplicate playlists`}
+                {skippedPlaylistTrackCount > 0 && ` · ${skippedPlaylistTrackCount.toLocaleString()} in skipped name-matches`}
               </p>
             )}
             <div className="grid grid-cols-2 gap-4">

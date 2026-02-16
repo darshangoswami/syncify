@@ -47,6 +47,7 @@ export interface TransferPreviewRequest {
 }
 
 export interface TransferPreviewUnmatchedTrack {
+  playlistId: string;
   trackId: string;
   title: string;
   artist: string;

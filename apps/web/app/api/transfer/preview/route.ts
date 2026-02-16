@@ -218,6 +218,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         });
       } else {
         unmatchedTracks.push({
+          playlistId: sourceTrack.playlistId || "liked",
           trackId: sourceTrack.id,
           title: sourceTrack.title,
           artist: sourceTrack.artist,
@@ -226,6 +227,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
     } catch {
       unmatchedTracks.push({
+        playlistId: sourceTrack.playlistId || "liked",
         trackId: sourceTrack.id,
         title: sourceTrack.title,
         artist: sourceTrack.artist,
