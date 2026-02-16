@@ -185,6 +185,7 @@ describe("POST /api/transfer/preview", () => {
     expect(payload.preview.totalSourceTracks).toBe(3);
     expect(payload.preview.unmatchedTracks).toEqual([
       {
+        playlistId: "pl-1",
         trackId: "src-3",
         title: "No Match Song",
         artist: "Ghost",
