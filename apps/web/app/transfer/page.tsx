@@ -546,24 +546,22 @@ function TransferPageInner(): ReactElement {
   /* ──────────────────────────── Loading ──────────────────────── */
   if (loading) {
     return (
-      <div className="fixed inset-0 flex justify-center">
-        <div className="relative w-full max-w-100 h-full bg-background-dark flex flex-col items-center justify-center">
-          <div className="relative w-12 h-12 mb-4">
-            <div className="absolute inset-0 border-4 border-dashed border-primary rounded-full animate-spin" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="material-icons-round text-primary">sync</span>
-            </div>
+      <div className="min-h-dvh bg-background-dark flex flex-col items-center justify-center">
+        <div className="relative w-12 h-12 mb-4">
+          <div className="absolute inset-0 border-4 border-dashed border-primary rounded-full animate-spin" />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className="material-icons-round text-primary">sync</span>
           </div>
-          <p className="text-zinc-500 text-sm font-bold">
-            Preparing preview... ({previewProgress.current}/{previewProgress.total})
-          </p>
-          {previewProgress.currentName && (
-            <p className="text-zinc-400 text-xs mt-2">
-              {previewProgress.currentName}
-            </p>
-          )}
-          <p className="text-zinc-600 text-[11px] mt-6">Keep your screen on until the preview is ready.</p>
         </div>
+        <p className="text-zinc-500 text-sm font-bold">
+          Preparing preview... ({previewProgress.current}/{previewProgress.total})
+        </p>
+        {previewProgress.currentName && (
+          <p className="text-zinc-400 text-xs mt-2">
+            {previewProgress.currentName}
+          </p>
+        )}
+        <p className="text-zinc-600 text-[11px] mt-6">Keep your screen on until the preview is ready.</p>
       </div>
     );
   }
@@ -571,18 +569,16 @@ function TransferPageInner(): ReactElement {
   /* ──────────────────────────── Error ─────────────────────────── */
   if (error && phase !== "progress" && phase !== "results") {
     return (
-      <div className="fixed inset-0 flex justify-center">
-        <div className="relative w-full max-w-100 h-full bg-background-dark flex flex-col items-center justify-center px-8 text-center">
-          <span className="material-icons-round text-red-500 text-5xl mb-4">error_outline</span>
-          <p className="text-white font-bold text-lg mb-2">Something went wrong</p>
-          <p className="text-zinc-400 text-sm mb-6">{error}</p>
-          <Link
-            href="/connections"
-            className="bg-zinc-800 text-white font-bold py-3 px-6 rounded-2xl transition-all active:scale-95"
-          >
-            Reconnect Providers
-          </Link>
-        </div>
+      <div className="min-h-dvh bg-background-dark flex flex-col items-center justify-center px-8 text-center">
+        <span className="material-icons-round text-red-500 text-5xl mb-4">error_outline</span>
+        <p className="text-white font-bold text-lg mb-2">Something went wrong</p>
+        <p className="text-zinc-400 text-sm mb-6">{error}</p>
+        <Link
+          href="/connections"
+          className="bg-zinc-800 text-white font-bold py-3 px-6 rounded-2xl transition-all active:scale-95"
+        >
+          Reconnect Providers
+        </Link>
       </div>
     );
   }
@@ -596,47 +592,47 @@ function TransferPageInner(): ReactElement {
       : 0;
 
     return (
-      <div className="fixed inset-0 flex justify-center">
-        <div className="relative w-full max-w-100 h-full bg-background-dark overflow-hidden flex flex-col">
-          {/* Header */}
-          <header className="px-6 py-4 flex items-center justify-between">
-            <Link
-              href="/select-sources"
-              className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center"
-            >
-              <span className="material-icons-round">arrow_back</span>
-            </Link>
-            <h1 className="text-lg font-bold">Transfer Preview</h1>
-            <div className="w-10" />
-          </header>
+      <div className="min-h-dvh bg-background-dark flex flex-col antialiased overflow-x-hidden">
+        {/* Header */}
+        <header className="w-full max-w-5xl mx-auto px-6 py-8 flex items-center gap-4">
+          <Link
+            href="/select-sources"
+            className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center hover:bg-zinc-700 transition-colors"
+          >
+            <span className="material-icons-round">arrow_back</span>
+          </Link>
+          <h1 className="text-2xl font-bold">Transfer Preview</h1>
+        </header>
 
-          {/* Scrollable content */}
-          <div className="flex-1 px-6 pb-32 overflow-y-auto space-y-6">
+        {/* Main */}
+        <main className="flex-grow w-full max-w-5xl mx-auto px-6 pb-44">
+          {/* Hero + Sync source */}
+          <div className="mb-10 flex flex-col items-center gap-6">
             {/* Hero card */}
-            <section className="relative bg-primary p-6 rounded-[2.5rem] text-black overflow-hidden shadow-lg">
-              <div className="absolute top-0 right-0 opacity-20 pointer-events-none">
-                <svg fill="none" height="120" viewBox="0 0 100 100" width="120">
-                  <path d="M10,50 Q25,25 50,50 T90,50" fill="none" stroke="currentColor" strokeWidth="4" />
-                  <circle cx="80" cy="20" fill="currentColor" r="10" />
+            <section className="relative bg-primary w-full max-w-2xl rounded-2xl p-8 overflow-hidden shadow-lg">
+              <div className="absolute top-0 right-0 p-6 opacity-50 pointer-events-none">
+                <svg fill="none" height="40" viewBox="0 0 120 40" width="120">
+                  <path className="text-green-800" d="M0 20C20 20 20 0 40 0C60 0 60 40 80 40C100 40 100 20 120 20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" />
+                  <circle className="text-green-800" cx="100" cy="8" fill="currentColor" r="6" />
                 </svg>
               </div>
-              <div className="relative z-10 flex flex-col items-center py-4">
-                <span className="text-xs font-bold uppercase tracking-widest opacity-70 mb-2">Ready to move</span>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-6xl font-black">{effectiveMatched.toLocaleString()}</span>
-                  <span className="text-xl font-bold">Songs</span>
+              <div className="relative z-10 flex flex-col items-center text-center">
+                <p className="text-green-900 font-semibold text-sm tracking-wider uppercase mb-2">Ready to move</p>
+                <div className="flex items-baseline justify-center gap-2 mb-6">
+                  <span className="text-6xl font-extrabold text-black">{effectiveMatched.toLocaleString()}</span>
+                  <span className="text-2xl font-bold text-black">Songs</span>
                 </div>
-                <div className="w-full h-3 bg-black/10 rounded-full mt-8 relative overflow-hidden">
-                  <div className="absolute top-0 left-0 h-full bg-black/40" style={{ width: `${matchedPercent}%` }} />
+                <div className="w-full max-w-md bg-green-800/30 rounded-full h-2.5 mb-3">
+                  <div className="bg-black h-2.5 rounded-full" style={{ width: `${matchedPercent}%` }} />
                 </div>
-                <div className="flex justify-between w-full mt-3 text-sm font-bold opacity-80">
-                  <div className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-black/60" />
-                    {effectiveMatched} Matched
+                <div className="flex items-center justify-between w-full max-w-md text-sm font-medium text-green-950">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-black" />
+                    <span>{effectiveMatched} Matched</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-white/60" />
-                    {effectiveTotal - effectiveMatched} Unmatched
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-green-200" />
+                    <span className="text-green-100">{effectiveTotal - effectiveMatched} Unmatched</span>
                   </div>
                 </div>
               </div>
@@ -644,7 +640,7 @@ function TransferPageInner(): ReactElement {
 
             {/* Track accounting note */}
             {(preview.duplicatesRemoved > 0 || preview.unavailableTracks > 0 || allowDuplicates || skippedPlaylistTrackCount > 0) && (
-              <p className="text-center text-xs text-zinc-500 -mt-3">
+              <p className="text-center text-xs text-zinc-500">
                 {(preview.totalSourceTracks + preview.duplicatesRemoved + preview.unavailableTracks).toLocaleString()} total
                 {preview.unavailableTracks > 0 && ` · ${preview.unavailableTracks.toLocaleString()} unavailable`}
                 {preview.duplicatesRemoved > 0 && !allowDuplicates && ` · ${preview.duplicatesRemoved.toLocaleString()} duplicates removed`}
@@ -654,145 +650,156 @@ function TransferPageInner(): ReactElement {
             )}
 
             {/* Sync source indicator */}
-            <section className="flex items-center justify-between p-4 bg-zinc-900 rounded-2xl border border-zinc-800">
-              <div className="flex items-center gap-3">
-                <div className="flex -space-x-2">
-                  <div className="w-10 h-10 rounded-full bg-[#1DB954] flex items-center justify-center ring-4 ring-zinc-900">
-                    <span className="material-icons-round text-white text-lg">music_note</span>
+            <section className="bg-card-dark border border-zinc-700 rounded-xl p-4 flex items-center justify-between w-full max-w-2xl">
+              <div className="flex items-center gap-4">
+                <div className="flex -space-x-3">
+                  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center ring-2 ring-card-dark z-10">
+                    <span className="material-icons-round text-white text-sm">music_note</span>
                   </div>
-                  <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center ring-4 ring-zinc-900 border border-zinc-700">
-                    <span className="material-icons-round text-white text-lg">waves</span>
+                  <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center ring-2 ring-card-dark z-0">
+                    <span className="material-icons-round text-white text-sm">waves</span>
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs text-zinc-400 font-semibold uppercase tracking-tight">Syncing from</p>
-                  <p className="text-sm font-bold">Spotify to TIDAL</p>
+                  <p className="text-xs text-zinc-400 uppercase tracking-wider font-semibold">Syncing from</p>
+                  <p className="font-semibold">Spotify to TIDAL</p>
                 </div>
               </div>
               <span className="material-icons-round text-primary">sync_alt</span>
             </section>
+          </div>
 
-            {/* Playlists breakdown */}
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold">Playlists breakdown</h2>
-              <span className="text-sm text-zinc-500 font-semibold">{effectivePlaylists.length} total</span>
-            </div>
-
-            <div className="space-y-3">
-              {preview.playlists.map((playlist, idx) => {
-                const pctMatch = playlist.totalTracks > 0
-                  ? Math.round((playlist.matchedCount / playlist.totalTracks) * 100)
-                  : 0;
-                const isLiked = playlist.playlistId === "liked";
-                const color = isLiked ? "bg-[#7C3AED]" : iconColors[idx % iconColors.length];
-                const icon = isLiked ? "favorite" : iconNames[idx % iconNames.length];
-                const isExcluded = !allowDuplicatePlaylists && duplicatePlaylistIds.has(playlist.playlistId);
-
-                return (
-                  <div
-                    key={playlist.playlistId}
-                    className={`p-4 bg-zinc-900 rounded-3xl flex items-center gap-4 group hover:ring-2 ring-primary transition-all ${isExcluded ? "opacity-40" : ""}`}
-                  >
-                    <div className={`w-14 h-14 ${color} rounded-2xl flex items-center justify-center shadow-lg transform group-hover:rotate-3 transition-transform`}>
-                      <span className="material-icons-round text-white text-3xl">{icon}</span>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-base">{playlist.playlistName}</h3>
-                      <p className="text-sm text-zinc-500">{playlist.matchedCount} songs matched</p>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      {isExcluded ? (
-                        <>
-                          <span className="text-amber-500 font-bold">Skipped</span>
-                          <span className="text-[10px] uppercase font-bold text-zinc-400">Already on TIDAL</span>
-                        </>
-                      ) : playlist.unmatchedCount > 0 ? (
-                        <>
-                          <span className="text-yellow-500 font-bold">{playlist.unmatchedCount} unmatched</span>
-                          <span className="text-[10px] uppercase font-bold text-zinc-400">Review needed</span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="text-primary font-bold">{pctMatch}%</span>
-                          <span className="text-[10px] uppercase font-bold text-zinc-400">
-                            {pctMatch === 100 ? "All found" : "Perfect Match"}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Already on TIDAL */}
-            {existingPlaylists.length > 0 && (
+          {/* 2-column grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left — Playlists breakdown */}
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold">Playlists breakdown</h2>
+                <span className="text-sm text-zinc-500">{effectivePlaylists.length} total</span>
+              </div>
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-bold">Already on TIDAL</h2>
-                  <span className="text-sm text-zinc-500 font-semibold">{existingPlaylists.length} found</span>
-                </div>
-                <div className="bg-amber-500/10 border border-amber-500/20 p-4 rounded-2xl space-y-3">
+                {preview.playlists.map((playlist, idx) => {
+                  const pctMatch = playlist.totalTracks > 0
+                    ? Math.round((playlist.matchedCount / playlist.totalTracks) * 100)
+                    : 0;
+                  const isLiked = playlist.playlistId === "liked";
+                  const color = isLiked ? "bg-[#7C3AED]" : iconColors[idx % iconColors.length];
+                  const icon = isLiked ? "favorite" : iconNames[idx % iconNames.length];
+                  const isExcluded = !allowDuplicatePlaylists && duplicatePlaylistIds.has(playlist.playlistId);
+
+                  return (
+                    <div
+                      key={playlist.playlistId}
+                      className={`bg-card-dark border border-zinc-700 rounded-xl p-4 flex items-center gap-4 hover:border-zinc-600 transition-colors ${isExcluded ? "opacity-40" : ""}`}
+                    >
+                      <div className={`w-14 h-14 ${color} rounded-xl flex items-center justify-center shrink-0 shadow-inner`}>
+                        <span className="material-icons-round text-white">{icon}</span>
+                      </div>
+                      <div className="flex-grow min-w-0">
+                        <h3 className="font-semibold truncate">{playlist.playlistName}</h3>
+                        <p className="text-sm text-zinc-500">{playlist.matchedCount} songs matched</p>
+                      </div>
+                      <div className="text-right shrink-0">
+                        {isExcluded ? (
+                          <>
+                            <p className="font-bold text-amber-500">Skipped</p>
+                            <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Already on TIDAL</p>
+                          </>
+                        ) : playlist.unmatchedCount > 0 ? (
+                          <>
+                            <p className="font-bold text-yellow-500">{playlist.unmatchedCount} unmatched</p>
+                            <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">Review needed</p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="font-bold text-primary">{pctMatch}%</p>
+                            <p className="text-[10px] text-zinc-500 uppercase tracking-wider font-bold">
+                              {pctMatch === 100 ? "All found" : "Perfect Match"}
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Right — Already on TIDAL + warnings */}
+            <div>
+              {existingPlaylists.length > 0 && (
+                <>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold">Already on TIDAL</h2>
+                    <span className="text-sm text-zinc-500">{existingPlaylists.length} found</span>
+                  </div>
                   {existingPlaylists.map((ep) => (
-                    <div key={ep.sourcePlaylistId} className="flex items-center gap-3">
-                      <span className="material-icons-round text-amber-500 text-lg">playlist_play</span>
-                      <span className="text-sm text-amber-300 font-medium">{ep.sourcePlaylistName}</span>
+                    <div key={ep.sourcePlaylistId} className="bg-yellow-900/20 border border-yellow-700/50 rounded-xl p-4 flex items-center gap-3 mb-4 text-yellow-500">
+                      <span className="material-icons-round text-lg">playlist_play</span>
+                      <span className="font-medium text-sm">{ep.sourcePlaylistName}</span>
                     </div>
                   ))}
+                  <div className="mb-6">
+                    <div
+                      role="checkbox"
+                      aria-checked={allowDuplicatePlaylists}
+                      tabIndex={0}
+                      className="flex items-start gap-3 cursor-pointer group"
+                      onClick={() => setAllowDuplicatePlaylists((v) => !v)}
+                      onKeyDown={(e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); setAllowDuplicatePlaylists((v) => !v); } }}
+                    >
+                      <div className="relative flex items-center justify-center mt-0.5">
+                        <div
+                          className={`w-5 h-5 rounded border-2 ${
+                            allowDuplicatePlaylists ? "border-primary bg-primary" : "border-zinc-600 bg-transparent"
+                          } flex items-center justify-center transition-colors`}
+                        >
+                          {allowDuplicatePlaylists && (
+                            <span className="material-icons-round text-white text-[16px] leading-none">check</span>
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <p className="font-semibold mb-1 group-hover:text-primary transition-colors">Create playlists even if names already exist</p>
+                        <p className="text-sm text-zinc-500 leading-relaxed">Name matches are heuristic only. Turn this off only if you want to skip same-name playlists.</p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Warning for unmatched */}
+              {effectiveUnmatched > 0 && (
+                <div className="bg-yellow-900/10 border border-yellow-700/50 rounded-xl p-4 flex items-start gap-3 relative overflow-hidden">
+                  <span className="material-icons-round text-yellow-500 mt-0.5">warning</span>
+                  <p className="text-sm text-yellow-500 font-medium leading-relaxed">
+                    {effectiveUnmatched} songs couldn&apos;t be automatically matched. You can review them after the transfer is complete.
+                  </p>
+                  <div className="absolute -right-4 -bottom-4 w-16 h-16 border-2 border-dashed border-yellow-500/20 rounded-full" />
                 </div>
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={allowDuplicatePlaylists}
-                    onChange={(e) => setAllowDuplicatePlaylists(e.target.checked)}
-                    className="w-5 h-5 rounded border-zinc-600 bg-zinc-800 text-primary accent-primary"
-                  />
-                  <span className="text-sm text-zinc-300 font-medium">Create playlists even if names already exist</span>
-                </label>
-                <p className="text-xs text-zinc-500">
-                  Name matches are heuristic only. Turn this off only if you want to skip same-name playlists.
-                </p>
-              </div>
-            )}
-
-            {/* Warning for unmatched */}
-            {effectiveUnmatched > 0 && (
-              <div className="bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-2xl flex gap-3 items-start">
-                <span className="material-icons-round text-yellow-500 mt-0.5">warning</span>
-                <p className="text-sm text-yellow-400 leading-relaxed font-medium">
-                  {effectiveUnmatched} songs couldn&apos;t be automatically matched. You can review them after the transfer is complete.
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Bottom CTA */}
-          <div className="absolute bottom-0 left-0 right-0 p-6 pt-10 bg-gradient-to-t from-background-dark via-background-dark/90 to-transparent">
-            <button
-              className="w-full bg-primary text-black py-5 rounded-[2rem] font-black text-lg shadow-[0_10px_30px_rgba(34,197,94,0.3)] transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-              onClick={() => void startTransfer()}
-            >
-              <span>START TRANSFER</span>
-              <span className="material-icons-round">arrow_forward</span>
-            </button>
-            <div className="mt-4 flex justify-center gap-2">
-              <div className="w-12 h-1.5 rounded-full bg-zinc-800" />
-              <div className="w-12 h-1.5 rounded-full bg-primary" />
-              <div className="w-12 h-1.5 rounded-full bg-zinc-800" />
+              )}
             </div>
           </div>
+        </main>
 
-          {/* Decorative */}
-          <div className="absolute top-[20%] -left-6 pointer-events-none opacity-20 animate-pulse">
-            <svg height="60" viewBox="0 0 100 100" width="60">
-              <path d="M50 10 L60 40 L90 50 L60 60 L50 90 L40 60 L10 50 L40 40 Z" fill="#22c55e" />
-            </svg>
+        {/* Fixed bottom CTA */}
+        <div className="fixed bottom-0 left-0 w-full bg-background-dark/90 backdrop-blur-md border-t border-zinc-800 p-6 pb-7 z-50">
+          <div className="max-w-5xl mx-auto flex flex-col items-center">
+            <button
+              className="w-full max-w-md bg-primary hover:bg-green-500 text-black font-bold text-lg py-4 px-8 rounded-full shadow-[0_0_20px_rgba(34,197,94,0.3)] transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+              onClick={() => void startTransfer()}
+            >
+              START TRANSFER
+              <span className="material-icons-round text-black">arrow_forward</span>
+            </button>
           </div>
-          <div className="absolute bottom-[20%] -right-6 pointer-events-none opacity-20 animate-bounce">
-            <svg height="80" viewBox="0 0 100 100" width="80">
-              <circle cx="50" cy="50" fill="none" r="30" stroke="#7C3AED" strokeDasharray="10 5" strokeWidth="4" />
-            </svg>
-          </div>
+        </div>
+
+        {/* Progress bar */}
+        <div className="fixed bottom-0 left-0 right-0 h-1 flex z-50">
+          <div className="h-full bg-zinc-800 flex-1" />
+          <div className="h-full bg-primary flex-1 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
+          <div className="h-full bg-zinc-800 flex-1" />
         </div>
       </div>
     );
@@ -802,112 +809,106 @@ function TransferPageInner(): ReactElement {
   /*                    PHASE 2: PROGRESS                         */
   /* ══════════════════════════════════════════════════════════════ */
   if (phase === "progress") {
+    const circumference = 2 * Math.PI * 45; // r=45
+    const strokeOffset = circumference - (circumference * percentComplete) / 100;
+
     return (
-      <div className="fixed inset-0 flex justify-center">
-        <div className="relative w-full max-w-100 h-full bg-black overflow-y-auto flex flex-col">
+      <div className="min-h-dvh bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white flex flex-col antialiased">
+        <div className="max-w-3xl mx-auto w-full relative">
           {/* Header */}
-          <header className="px-6 pt-6 pb-4 flex items-center justify-between">
-            <div className="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center opacity-50">
-              <span className="material-icons-round">arrow_back</span>
+          <header className="flex items-center p-6 border-b border-zinc-100 dark:border-zinc-800 relative z-10">
+            <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center opacity-50">
+              <span className="material-icons-round text-zinc-600 dark:text-zinc-300">arrow_back</span>
             </div>
-            <h1 className="text-lg font-bold">Transfer</h1>
-            <div className="w-10" />
+            <h1 className="flex-1 text-center text-xl font-bold tracking-tight">Transfer</h1>
+            <div className="w-10 h-10" />
           </header>
 
-          {/* Info */}
-          <div className="px-6 space-y-1 mb-6">
-            <div className="flex items-center gap-2">
-              <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-extrabold uppercase tracking-wider">
+          <main className="p-8 md:p-12 relative">
+            {/* Floating stickers - hidden on mobile */}
+            <div className="absolute top-10 right-10 bg-purple-600 rounded-xl p-3 shadow-lg rotate-12 hidden md:block animate-float" style={{ animationDelay: "0.5s" }}>
+              <span className="material-icons-round text-white">music_note</span>
+            </div>
+            <div className="absolute bottom-40 left-10 bg-yellow-400 rounded-full p-3 shadow-lg -rotate-12 hidden md:block animate-float">
+              <span className="material-icons-round text-black">auto_awesome</span>
+            </div>
+
+            {/* Info */}
+            <div className="text-center mb-12">
+              <div className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold tracking-wider uppercase mb-4">
                 Live Transfer
-              </span>
-            </div>
-            <h2 className="text-2xl font-extrabold leading-tight">{progress.currentPlaylistName || "Starting..."}</h2>
-            <p className="text-zinc-400 font-medium">
-              Processing ({progress.processedTracks}/{progress.totalTracks})
-            </p>
-          </div>
-
-          {/* Circular progress */}
-          <div className="relative flex-1 flex flex-col items-center justify-center">
-            {/* Floating stickers */}
-            <div className="absolute top-0 right-6 animate-float" style={{ animationDelay: "0.5s" }}>
-              <div className="w-12 h-12 bg-[#7C5DFF] rounded-xl rotate-12 flex items-center justify-center shadow-lg border-2 border-white">
-                <span className="material-icons-round text-white">music_note</span>
               </div>
-            </div>
-            <div className="absolute bottom-10 left-6 animate-float">
-              <div className="w-14 h-14 bg-yellow-400 rounded-full -rotate-6 flex items-center justify-center shadow-lg border-2 border-white">
-                <span className="material-icons-round text-black">auto_awesome</span>
-              </div>
-            </div>
-
-            {/* Progress ring */}
-            <div
-              className="relative w-64 h-64 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(34,197,94,0.15)]"
-              style={{
-                background: `radial-gradient(closest-side, #161616 79%, transparent 80% 100%), conic-gradient(#22c55e ${percentComplete}%, #262626 0)`
-              }}
-            >
-              <div className="w-[85%] h-[85%] bg-zinc-900 rounded-full flex flex-col items-center justify-center text-center p-8">
-                <div className="relative mb-2">
-                  <svg className="text-primary" height="60" viewBox="0 0 100 100" width="60">
-                    <path className="doodle-path" d="M20,50 Q35,20 50,50 T80,50" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="4" />
-                    <circle cx="50" cy="50" fill="none" r="40" stroke="currentColor" strokeDasharray="4 4" strokeWidth="1" />
-                  </svg>
-                  <span className="material-icons-round absolute inset-0 flex items-center justify-center text-3xl">sync</span>
-                </div>
-                <span className="text-4xl font-black tracking-tighter">{percentComplete}%</span>
-                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest mt-1">
-                  {avgChunkTime > 0 ? `Est. ${estimatedMinutes} min` : "Calculating..."}
-                </span>
-              </div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-2">{progress.currentPlaylistName || "Starting..."}</h2>
+              <p className="text-zinc-400 text-lg">
+                Processing ({progress.processedTracks}/{progress.totalTracks})
+              </p>
             </div>
 
-            {/* Decorative wave */}
-            <div className="mt-12 w-full flex justify-center opacity-40">
-              <svg className="text-primary" height="30" viewBox="0 0 200 30" width="200">
-                <path d="M0 15 Q 12.5 5, 25 15 T 50 15 T 75 15 T 100 15 T 125 15 T 150 15 T 175 15 T 200 15" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="3" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Now playing card */}
-          <div className="px-6 mb-4">
-            <div className="bg-zinc-900/50 border border-zinc-800 rounded-3xl p-5 flex items-center gap-4">
-              <div className="w-12 h-12 bg-zinc-800 rounded-xl overflow-hidden flex-shrink-0">
-                <div className="w-full h-full bg-gradient-to-br from-[#4A7CFF] to-[#7C5DFF] opacity-80 flex items-center justify-center">
-                  <span className="material-icons-round text-white">play_arrow</span>
+            {/* SVG Progress ring */}
+            <div className="flex justify-center mb-16 relative">
+              <div className="relative w-64 h-64 md:w-80 md:h-80">
+                <svg className="w-full h-full" viewBox="0 0 100 100">
+                  <circle
+                    className="text-zinc-200 dark:text-zinc-800"
+                    cx="50" cy="50" r="45"
+                    fill="none" stroke="currentColor" strokeWidth="8"
+                  />
+                  <circle
+                    className="text-primary"
+                    cx="50" cy="50" r="45"
+                    fill="none" stroke="currentColor" strokeWidth="8"
+                    strokeLinecap="round"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={strokeOffset}
+                    style={{ transition: "stroke-dashoffset 0.35s", transform: "rotate(-90deg)", transformOrigin: "50% 50%" }}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                  <div className="w-12 h-12 rounded-full border border-dashed border-primary flex items-center justify-center mb-3">
+                    <span className="material-icons-round text-primary animate-spin">sync</span>
+                  </div>
+                  <span className="text-5xl md:text-6xl font-bold tracking-tighter mb-1">{percentComplete}%</span>
+                  <span className="text-sm text-zinc-400 font-medium uppercase tracking-wider">
+                    {avgChunkTime > 0 ? `Est. ${estimatedMinutes} min` : "Calculating..."}
+                  </span>
                 </div>
               </div>
-              <div className="flex-1 overflow-hidden">
-                <p className="text-xs font-bold text-primary mb-0.5">Moving now</p>
-                <p className="font-bold truncate">
+            </div>
+
+            {/* Now playing card */}
+            <div className="bg-zinc-50 dark:bg-zinc-950 rounded-2xl p-6 mb-8 border border-zinc-100 dark:border-zinc-800 shadow-sm flex items-center gap-6">
+              <div className="w-16 h-16 rounded-xl bg-purple-600/20 flex items-center justify-center shrink-0">
+                <span className="material-icons-round text-purple-600 text-3xl">play_arrow</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-primary text-sm font-semibold mb-1">Moving now</p>
+                <h3 className="text-xl font-bold truncate mb-3">
                   {progress.currentTrackTitle
                     ? `${progress.currentTrackTitle} — ${progress.currentTrackArtist}`
                     : "Preparing..."}
-                </p>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] px-1.5 py-0.5 bg-green-500/10 text-green-500 rounded font-bold">SPOTIFY</span>
-                  <span className="material-icons-round text-xs text-zinc-600">arrow_forward</span>
-                  <span className="text-[10px] px-1.5 py-0.5 bg-black text-white rounded font-bold border border-zinc-700">TIDAL</span>
+                </h3>
+                <div className="flex items-center gap-3">
+                  <span className="px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold uppercase tracking-wide border border-green-200 dark:border-green-800">Spotify</span>
+                  <span className="material-icons-round text-zinc-400 text-sm">arrow_forward</span>
+                  <span className="px-2 py-1 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 text-xs font-bold uppercase tracking-wide border border-zinc-300 dark:border-zinc-700">TIDAL</span>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Stop button */}
-          <div className="px-6 pb-8">
-            <button
-              className="w-full py-5 rounded-[22px] bg-zinc-800 text-white font-bold transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
-              onClick={stopTransfer}
-            >
-              <span className="material-icons-round text-red-500">stop_circle</span>
-              Stop Transfer
-            </button>
-            <p className="text-center text-[11px] text-zinc-500 mt-4 px-6 leading-relaxed">
-              Keep your screen on and don&apos;t close the app during the transfer.
-            </p>
-          </div>
+            {/* Stop button */}
+            <div className="flex flex-col items-center">
+              <button
+                className="w-full md:w-auto px-8 py-4 rounded-xl bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white font-semibold text-lg flex items-center justify-center gap-3 transition-colors mb-4 border border-zinc-300 dark:border-zinc-700"
+                onClick={stopTransfer}
+              >
+                <span className="w-4 h-4 rounded bg-red-500 block" />
+                Stop Transfer
+              </button>
+              <p className="text-sm text-zinc-400 text-center">
+                Keep your screen on and don&apos;t close the app during the transfer.
+              </p>
+            </div>
+          </main>
         </div>
       </div>
     );
@@ -921,155 +922,160 @@ function TransferPageInner(): ReactElement {
     const hasUnmatched = unmatchedText.length > 0;
 
     return (
-      <div className="fixed inset-0 flex justify-center">
-        <div className="relative w-full max-w-100 h-full bg-[#121212] overflow-hidden flex flex-col">
+      <div className="min-h-dvh bg-zinc-50 dark:bg-background-dark text-zinc-900 dark:text-white flex flex-col items-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-4xl flex flex-col gap-10">
           {/* Header */}
-          <div className="px-6 pt-8 pb-4 relative overflow-hidden">
-            <div className="flex justify-between items-start mb-6">
+          <div className="flex items-start justify-between relative">
+            <div className="flex flex-col gap-4">
               <button
-                className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center"
+                className="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors"
                 onClick={() => router.push("/select-sources")}
               >
-                <span className="material-icons-round">arrow_back</span>
+                <span className="material-icons-round text-zinc-700 dark:text-white">arrow_back</span>
               </button>
+              <div>
+                <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-2">
+                  Transfer<br />
+                  <span className="text-primary">{progress.cancelled ? "Stopped" : "Complete"}</span>
+                </h1>
+                <p className="text-zinc-500 dark:text-zinc-400 max-w-md mt-4 text-sm sm:text-base leading-relaxed">
+                  {progress.cancelled
+                    ? "Transfer was stopped. Partial results are shown below."
+                    : "Your Spotify library has been successfully moved to TIDAL."}
+                </p>
+              </div>
             </div>
-            <h1 className="text-4xl font-extrabold leading-tight mb-2">
-              Transfer <br />
-              <span className="text-primary">{progress.cancelled ? "Stopped" : "Complete"}</span>
-            </h1>
-            <p className="text-zinc-400 text-sm max-w-[80%] mt-4">
-              {progress.cancelled
-                ? "Transfer was stopped. Partial results are shown below."
-                : "Your Spotify library has been successfully moved to TIDAL."}
-            </p>
-
             {/* Decorative SVG */}
-            <div className="absolute top-20 right-4 animate-float opacity-80">
-              <svg fill="none" height="60" viewBox="0 0 60 60" width="60">
-                <path className="text-[#5865F2]" d="M10 30C10 30 15 10 30 10C45 10 50 30 50 30C50 30 45 50 30 50C15 50 10 30 10 30Z" stroke="currentColor" strokeWidth="2" />
-                <circle className="text-primary" cx="30" cy="30" fill="currentColor" r="10" />
-                <path className="text-zinc-700" d="M5 5L15 15M55 5L45 15M5 55L15 45M55 55L45 45" stroke="currentColor" strokeWidth="2" />
+            <div className="absolute top-0 right-0 hidden sm:block opacity-50 pointer-events-none">
+              <svg fill="none" height="64" viewBox="0 0 64 64" width="64">
+                <circle cx="32" cy="32" r="16" stroke="#22C55E" strokeWidth="4" />
+                <path d="M4 4L20 20M60 4L44 20M4 60L20 44M60 60L44 44" stroke="#333" strokeLinecap="round" strokeWidth="2" />
               </svg>
             </div>
           </div>
 
-          {/* Scrollable content */}
-          <div className="flex-1 overflow-y-auto px-6 pb-48 space-y-4">
-            {/* Stats grid */}
-            {preview && (preview.duplicatesRemoved > 0 || preview.unavailableTracks > 0 || skippedPlaylistTrackCount > 0) && (
-              <p className="text-center text-xs text-zinc-500">
-                {(preview.totalSourceTracks + preview.duplicatesRemoved + preview.unavailableTracks).toLocaleString()} total songs
-                {preview.unavailableTracks > 0 && ` · ${preview.unavailableTracks.toLocaleString()} unavailable`}
-                {preview.duplicatesRemoved > 0 && !allowDuplicates && ` · ${preview.duplicatesRemoved.toLocaleString()} duplicate tracks removed`}
-                {skippedPlaylistTrackCount > 0 && ` · ${skippedPlaylistTrackCount.toLocaleString()} in skipped name-matches`}
-              </p>
-            )}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-[#5865F2] p-5 rounded-3xl text-white relative overflow-hidden">
-                <span className="text-xs font-bold uppercase tracking-widest opacity-80">{allowDuplicates ? "Total Tracks" : "Unique Tracks"}</span>
-                <div className="text-4xl font-black mt-1">{effectiveTotal.toLocaleString()}</div>
-                <span className="material-icons-round absolute -bottom-2 -right-2 text-6xl opacity-20 rotate-12">library_music</span>
-              </div>
-              <div className="bg-primary p-5 rounded-3xl text-black relative overflow-hidden">
-                <span className="text-xs font-bold uppercase tracking-widest opacity-70">Matched</span>
-                <div className="text-4xl font-black mt-1">{progress.added.toLocaleString()}</div>
-                <span className="material-icons-round absolute -bottom-2 -right-2 text-6xl opacity-20 rotate-12">verified</span>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-zinc-800 p-5 rounded-3xl relative overflow-hidden">
-                <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">Skipped</span>
-                <div className="text-3xl font-bold mt-1">{progress.skipped}</div>
-                <span className="material-icons-round absolute top-4 right-4 text-zinc-600">fast_forward</span>
-              </div>
-              <div className="bg-zinc-800 p-5 rounded-3xl relative overflow-hidden border-2 border-transparent hover:border-red-400/30 transition-colors">
-                <span className="text-xs font-bold uppercase tracking-widest text-zinc-400">Failed</span>
-                <div className="text-3xl font-bold mt-1 text-red-500">{progress.failed}</div>
-                <span className="material-icons-round absolute top-4 right-4 text-red-500/50">error</span>
-              </div>
-            </div>
+          {/* Info line */}
+          {preview && (preview.duplicatesRemoved > 0 || preview.unavailableTracks > 0 || skippedPlaylistTrackCount > 0) && (
+            <p className="text-center text-xs text-zinc-500">
+              {(preview.totalSourceTracks + preview.duplicatesRemoved + preview.unavailableTracks).toLocaleString()} total songs
+              {preview.unavailableTracks > 0 && ` · ${preview.unavailableTracks.toLocaleString()} unavailable`}
+              {preview.duplicatesRemoved > 0 && !allowDuplicates && ` · ${preview.duplicatesRemoved.toLocaleString()} duplicate tracks removed`}
+              {skippedPlaylistTrackCount > 0 && ` · ${skippedPlaylistTrackCount.toLocaleString()} in skipped name-matches`}
+            </p>
+          )}
 
-            {/* Detailed report */}
-            <div className="mt-6">
-              <h3 className="font-bold text-lg mb-4">Detailed Report</h3>
-              <div className="space-y-3">
-                {/* Match rate */}
-                <div className="flex items-center gap-4 bg-zinc-900/50 p-3 rounded-2xl border border-zinc-800">
-                  <div className="w-10 h-10 bg-[#B794F4] rounded-xl flex items-center justify-center text-white">
-                    <span className="material-icons-round">playlist_add_check</span>
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-sm font-bold">Match Rate</div>
-                    <div className="h-1.5 w-full bg-zinc-700 rounded-full mt-1 overflow-hidden">
-                      <div className="bg-primary h-full rounded-full" style={{ width: `${matchRate}%` }} />
-                    </div>
-                  </div>
-                  <div className="text-xs font-bold text-primary">{matchRate}%</div>
-                </div>
-
-                {/* Unmatched report text box */}
-                {hasUnmatched && (
-                  <div className="bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-[#F6E05E] rounded-xl flex items-center justify-center text-black">
-                          <span className="material-icons-round">description</span>
-                        </div>
-                        <div className="text-sm font-bold">Unmatched Report</div>
-                      </div>
-                      <button
-                        className="bg-zinc-800 px-3 py-1.5 rounded-lg text-xs font-bold border border-zinc-700 shadow-sm active:scale-95 transition-transform flex items-center gap-1"
-                        onClick={() => void copyReport()}
-                      >
-                        <span className="material-icons-round text-sm">{copied ? "check" : "content_copy"}</span>
-                        {copied ? "Copied!" : "Copy"}
-                      </button>
-                    </div>
-                    <textarea
-                      className="w-full h-32 bg-zinc-800 border border-zinc-700 rounded-xl p-3 text-xs text-zinc-300 font-mono resize-none outline-none focus:ring-2 focus:ring-primary"
-                      readOnly
-                      value={unmatchedText}
-                    />
-                  </div>
-                )}
+          {/* Stats grid — 4 columns on large */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="bg-[#7068FF] text-white rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden shadow-lg">
+              <div className="absolute -right-4 -bottom-4 opacity-20">
+                <span className="material-icons-round text-6xl">queue_music</span>
               </div>
+              <h3 className="text-xs font-bold uppercase tracking-wider mb-2 opacity-90">{allowDuplicates ? "Total Tracks" : "Unique Tracks"}</h3>
+              <p className="text-4xl sm:text-5xl font-extrabold">{effectiveTotal.toLocaleString()}</p>
+            </div>
+            <div className="bg-primary text-black rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden shadow-lg">
+              <div className="absolute -right-2 -bottom-2 opacity-20">
+                <span className="material-icons-round text-6xl">check_circle</span>
+              </div>
+              <h3 className="text-xs font-bold uppercase tracking-wider mb-2 opacity-90">Matched</h3>
+              <p className="text-4xl sm:text-5xl font-extrabold">{progress.added.toLocaleString()}</p>
+            </div>
+            <div className="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-6 flex flex-col justify-between shadow-sm">
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Skipped</h3>
+                <span className="material-icons-round text-zinc-400 dark:text-zinc-600 text-sm">fast_forward</span>
+              </div>
+              <p className="text-4xl sm:text-5xl font-extrabold">{progress.skipped}</p>
+            </div>
+            <div className="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-2xl p-6 flex flex-col justify-between shadow-sm">
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400">Failed</h3>
+                <span className="material-icons-round text-red-500 text-sm">error</span>
+              </div>
+              <p className="text-4xl sm:text-5xl font-extrabold text-red-500">{progress.failed}</p>
             </div>
           </div>
 
-          {/* Bottom actions */}
-          <div className="absolute bottom-0 left-0 right-0 p-6 pt-10 bg-gradient-to-t from-[#121212] via-[#121212]/90 to-transparent space-y-3">
-            <div className={`grid ${hasUnmatched ? "grid-cols-2" : "grid-cols-1"} gap-3`}>
+          {/* Detailed Report */}
+          <div>
+            <h2 className="text-xl font-bold mb-4">Detailed Report</h2>
+            <div className="flex flex-col gap-4">
+              {/* Match rate */}
+              <div className="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl p-4 sm:p-5 flex items-center gap-4 shadow-sm">
+                <div className="w-10 h-10 rounded-lg bg-purple-100 dark:bg-[#7068FF]/20 flex items-center justify-center shrink-0">
+                  <span className="material-icons-round text-purple-600 dark:text-[#7068FF] text-xl">playlist_add_check</span>
+                </div>
+                <div className="flex-grow">
+                  <div className="flex justify-between items-end mb-2">
+                    <span className="font-semibold text-sm">Match Rate</span>
+                    <span className="text-primary font-bold text-sm">{matchRate}%</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                    <div className="h-full bg-primary rounded-full" style={{ width: `${matchRate}%` }} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Unmatched report */}
               {hasUnmatched && (
-                <button
-                  className="bg-primary text-black font-bold py-4 rounded-full flex items-center justify-center gap-2 active:scale-[0.98] transition-all text-sm"
-                  onClick={() => void copyReport()}
-                >
-                  <span className="material-icons-round text-lg">{copied ? "check" : "content_copy"}</span>
-                  {copied ? "Copied!" : "Copy Report"}
-                </button>
+                <div className="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl shadow-sm overflow-hidden flex flex-col">
+                  <div className="p-4 sm:p-5 flex justify-between items-center border-b border-zinc-100 dark:border-zinc-700">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded bg-yellow-100 dark:bg-yellow-500/20 flex items-center justify-center">
+                        <span className="material-icons-round text-yellow-600 dark:text-yellow-400 text-sm">description</span>
+                      </div>
+                      <span className="font-semibold text-sm">Unmatched Report</span>
+                    </div>
+                    <button
+                      className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors active:scale-95"
+                      onClick={() => void copyReport()}
+                    >
+                      <span className="material-icons-round text-[16px]">{copied ? "check" : "content_copy"}</span>
+                      {copied ? "Copied!" : "Copy"}
+                    </button>
+                  </div>
+                  <div className="bg-zinc-50 dark:bg-zinc-900 p-4 sm:p-6 flex-grow">
+                    <pre className="text-xs sm:text-sm text-zinc-600 dark:text-zinc-400 font-mono h-48 overflow-y-auto whitespace-pre-wrap leading-relaxed">
+                      <code>{unmatchedText}</code>
+                    </pre>
+                  </div>
+                </div>
               )}
-              <button
-                className="bg-transparent text-white border-2 border-zinc-800 font-bold py-4 rounded-full flex items-center justify-center gap-2 hover:bg-zinc-900 active:scale-[0.98] transition-all text-sm"
-                onClick={() => router.push("/select-sources")}
-              >
-                <span className="material-icons-round text-lg">refresh</span>
-                New Transfer
-              </button>
             </div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 sm:items-center mt-2">
+            {hasUnmatched && (
+              <button
+                className="flex-1 bg-primary text-black font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-2 hover:brightness-110 transition-all active:scale-[0.98] shadow-lg shadow-primary/20"
+                onClick={() => void copyReport()}
+              >
+                <span className="material-icons-round">{copied ? "check" : "content_copy"}</span>
+                {copied ? "Copied!" : "Copy Report"}
+              </button>
+            )}
             <button
-              className="w-full bg-zinc-900 text-zinc-300 font-bold py-4 rounded-full flex items-center justify-center gap-2 hover:bg-zinc-800 hover:text-white active:scale-[0.98] transition-all"
-              onClick={() => router.push("/done")}
+              className="flex-1 bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-2 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors active:scale-[0.98] shadow-sm"
+              onClick={() => router.push("/select-sources")}
             >
-              I&apos;m done
+              <span className="material-icons-round">refresh</span>
+              New Transfer
             </button>
           </div>
+          <button
+            className="w-full bg-zinc-100 dark:bg-zinc-800/50 text-zinc-600 dark:text-zinc-400 font-semibold py-4 px-6 rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors active:scale-[0.98]"
+            onClick={() => router.push("/done")}
+          >
+            I&apos;m done
+          </button>
+        </div>
 
-          {/* Decorative wave */}
-          <div className="absolute -bottom-6 -left-10 opacity-20 pointer-events-none">
-            <svg fill="none" height="100" viewBox="0 0 200 100" width="200">
-              <path className="text-primary" d="M10 80C30 40 70 90 110 50C150 10 190 60 190 60" stroke="currentColor" strokeLinecap="round" strokeWidth="12" />
-            </svg>
-          </div>
+        {/* Progress bar */}
+        <div className="fixed bottom-0 left-0 right-0 h-1 flex z-50">
+          <div className="h-full bg-zinc-800 flex-1" />
+          <div className="h-full bg-zinc-800 flex-1" />
+          <div className="h-full bg-primary flex-1 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
         </div>
       </div>
     );
@@ -1085,16 +1091,14 @@ export default function TransferPage(): ReactElement {
   return (
     <Suspense
       fallback={
-        <div className="fixed inset-0 flex justify-center">
-          <div className="relative w-full max-w-100 h-full bg-background-dark flex flex-col items-center justify-center">
-            <div className="relative w-12 h-12 mb-4">
-              <div className="absolute inset-0 border-4 border-dashed border-primary rounded-full animate-spin" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="material-icons-round text-primary">sync</span>
-              </div>
+        <div className="min-h-dvh bg-background-dark flex flex-col items-center justify-center">
+          <div className="relative w-12 h-12 mb-4">
+            <div className="absolute inset-0 border-4 border-dashed border-primary rounded-full animate-spin" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="material-icons-round text-primary">sync</span>
             </div>
-            <p className="text-zinc-500 text-sm font-bold">Loading...</p>
           </div>
+          <p className="text-zinc-500 text-sm font-bold">Loading...</p>
         </div>
       }
     >

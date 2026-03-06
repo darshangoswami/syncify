@@ -3,105 +3,101 @@ import Link from "next/link";
 
 export default function LandingPage(): ReactElement {
   return (
-    <div className="flex justify-center min-h-dvh">
-      <div className="relative w-full max-w-100 min-h-dvh bg-background-dark flex flex-col">
-        {/* Main content */}
-        <div className="flex-1 overflow-y-auto px-6 pt-4 pb-8 relative">
-          {/* Logo */}
-          <div className="relative mb-12 flex flex-col items-center">
-            <div className="relative">
-              <h1 className="text-6xl font-extrabold tracking-tighter text-white mb-2">
-                sync<span className="text-primary">ify</span>
-              </h1>
-              <svg
-                className="absolute -bottom-2 left-0 w-full"
-                fill="none"
-                height="12"
-                viewBox="0 0 200 12"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  className="doodle-path"
-                  d="M2 10C30 2 70 2 100 10C130 2 170 2 198 10"
-                  stroke="#22C55E"
-                  strokeLinecap="round"
-                  strokeWidth="4"
-                />
-              </svg>
-            </div>
-            <div className="mt-8 flex gap-2">
-              <span className="px-3 py-1 bg-primary/10 rounded-full text-[10px] font-bold uppercase tracking-widest text-primary">
-                Beta Access
-              </span>
-            </div>
+    <div className="min-h-dvh bg-background-dark flex flex-col items-center justify-center p-6 relative">
+      <div className="max-w-4xl w-full flex flex-col items-center text-center space-y-12">
+        {/* Logo */}
+        <div className="space-y-6 flex flex-col items-center">
+          <div className="relative">
+            <h1 className="text-6xl font-extrabold tracking-tight text-white">
+              sync<span className="text-primary">ify</span>
+            </h1>
+            <svg
+              className="absolute -bottom-2 left-0 w-full"
+              fill="none"
+              height="12"
+              viewBox="0 0 200 12"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                className="doodle-path"
+                d="M2 10C30 2 70 2 100 10C130 2 170 2 198 10"
+                stroke="#22C55E"
+                strokeLinecap="round"
+                strokeWidth="4"
+              />
+            </svg>
           </div>
-
-          {/* Heading */}
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold leading-tight mb-3">
-              Your library, <br />
-              everywhere you go.
-            </h2>
-            <p className="text-zinc-400 text-sm leading-relaxed px-4">
-              Move your playlists, liked songs, and followed artists from Spotify
-              to TIDAL in seconds. No data loss, no hassle.
-            </p>
-          </div>
-
-          {/* Action Cards */}
-          <div className="space-y-4 relative z-10">
-            {/* Request Invite Card */}
-            <Link href="/request-invite" className="w-full text-left group block transition-transform active:scale-95">
-              <div className="bg-primary p-6 rounded-[32px] relative overflow-hidden flex flex-col justify-between shadow-xl shadow-primary/20">
-                <div className="absolute -top-4 -right-4 opacity-20 transform rotate-12">
-                  <span className="material-icons-round text-[120px] text-white">auto_awesome</span>
-                </div>
-                <span className="self-start bg-white/20 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider">
-                  Waitlist
-                </span>
-                <div className="flex items-center justify-between mt-3">
-                  <h3 className="text-2xl font-extrabold text-white">Request Invite</h3>
-                  <div className="bg-white text-primary p-2 rounded-full flex items-center justify-center">
-                    <span className="material-icons-round">arrow_forward</span>
-                  </div>
-                </div>
-              </div>
-            </Link>
-
-            {/* Already Approved Card */}
-            <Link href="/connections" className="w-full text-left group block transition-transform active:scale-95">
-              <div className="bg-zinc-900 border-2 border-zinc-800 p-6 rounded-[32px] relative overflow-hidden flex flex-col h-40 justify-between">
-                <div className="absolute top-4 right-4 text-secondary opacity-30">
-                  <span className="material-icons-round text-4xl">celebration</span>
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-white">Already Approved?</h3>
-                  <p className="text-zinc-500 text-sm mt-1">Sign in with your approved email</p>
-                </div>
-                <div className="flex items-center text-primary font-bold text-sm">
-                  Enter Portal{" "}
-                  <span className="material-icons-round ml-1 text-[18px]">login</span>
-                </div>
-              </div>
-            </Link>
-          </div>
-
-          {/* Decorative floating icons */}
-          <div className="absolute top-1/2 left-4 -translate-y-1/2 opacity-20 pointer-events-none">
-            <span className="material-icons-round text-5xl text-secondary">music_note</span>
-          </div>
-          <div className="absolute bottom-24 right-4 opacity-20 pointer-events-none">
-            <span className="material-icons-round text-6xl text-primary">headphones</span>
+          <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold tracking-wide border border-primary/20">
+            BETA ACCESS
           </div>
         </div>
 
+        {/* Heading */}
+        <div className="max-w-2xl space-y-6">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight leading-tight">
+            Your library, <br />
+            everywhere you go.
+          </h2>
+          <p className="text-lg md:text-xl text-zinc-400">
+            Move your playlists, liked songs, and followed artists from Spotify
+            to TIDAL in seconds. No data loss, no hassle.
+          </p>
+        </div>
+
+        {/* Action Cards */}
+        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 relative z-10">
+          {/* Request Invite Card */}
+          <Link href="/request-invite" className="group block transition-transform hover:scale-[1.02] active:scale-95">
+            <div className="bg-primary rounded-[2rem] p-8 flex flex-col justify-between items-start h-64 shadow-xl shadow-primary/20 relative overflow-hidden">
+              <div className="absolute -top-4 -right-4 opacity-20 transform rotate-12">
+                <span className="material-icons-round text-[120px] text-white">auto_awesome</span>
+              </div>
+              <span className="inline-flex items-center px-3 py-1 rounded-md bg-white/20 text-white text-xs font-bold tracking-wider uppercase backdrop-blur-sm">
+                Waitlist
+              </span>
+              <div className="w-full flex items-center justify-between mt-auto">
+                <h3 className="text-3xl font-bold text-white">Request Invite</h3>
+                <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                  <span className="material-icons-round text-3xl">arrow_forward</span>
+                </div>
+              </div>
+            </div>
+          </Link>
+
+          {/* Already Approved Card */}
+          <Link href="/connections" className="group block transition-transform hover:scale-[1.02] active:scale-95">
+            <div className="bg-card-dark rounded-[2rem] p-8 border border-zinc-800 flex flex-col justify-between items-start h-64 relative overflow-hidden">
+              <div className="w-full flex justify-end">
+                <span className="material-icons-round text-zinc-600 text-3xl">celebration</span>
+              </div>
+              <div className="w-full space-y-4">
+                <div className="space-y-2 text-left">
+                  <h3 className="text-2xl font-bold text-white">Already Approved?</h3>
+                  <p className="text-zinc-400">Sign in with your approved email</p>
+                </div>
+                <div className="flex items-center text-primary font-semibold text-lg group-hover:gap-2 transition-all">
+                  Enter Portal <span className="material-icons-round ml-1">login</span>
+                </div>
+              </div>
+            </div>
+          </Link>
+        </div>
+
         {/* Footer */}
-        <div className="px-6 py-8 bg-gradient-to-t from-background-dark via-background-dark to-transparent">
-          <p className="text-center text-[11px] text-zinc-600 px-8 leading-tight">
+        <div className="pt-12 pb-6 max-w-md mx-auto">
+          <p className="text-sm text-zinc-500 text-center">
             Transfer functionality is currently locked for beta users only. Join
             the waitlist for early access.
           </p>
         </div>
+      </div>
+
+      {/* Decorative floating icons */}
+      <div className="absolute top-1/2 left-8 -translate-y-1/2 opacity-20 pointer-events-none doodle-float">
+        <span className="material-icons-round text-5xl text-secondary">music_note</span>
+      </div>
+      <div className="absolute bottom-24 right-8 opacity-20 pointer-events-none doodle-float">
+        <span className="material-icons-round text-6xl text-primary">headphones</span>
       </div>
     </div>
   );
