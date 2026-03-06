@@ -605,7 +605,7 @@ function TransferPageInner(): ReactElement {
         </header>
 
         {/* Main */}
-        <main className="flex-grow w-full max-w-5xl mx-auto px-6 pb-32">
+        <main className="flex-grow w-full max-w-5xl mx-auto px-6 pb-44">
           {/* Hero + Sync source */}
           <div className="mb-10 flex flex-col items-center gap-6">
             {/* Hero card */}
@@ -670,7 +670,7 @@ function TransferPageInner(): ReactElement {
           </div>
 
           {/* 2-column grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left — Playlists breakdown */}
             <div>
               <div className="flex items-center justify-between mb-4">
