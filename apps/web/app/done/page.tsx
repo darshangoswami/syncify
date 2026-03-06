@@ -3,10 +3,9 @@
 import type { ReactElement } from "react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { LIBRARY_CACHE_KEY } from "@/lib/constants";
 
 type DeleteState = "idle" | "deleting" | "done";
-
-const CACHE_KEY = "syncify:library";
 
 export default function DonePage(): ReactElement {
   const router = useRouter();
@@ -17,7 +16,7 @@ export default function DonePage(): ReactElement {
     setDeleteState("deleting");
 
     try {
-      sessionStorage.removeItem(CACHE_KEY);
+      sessionStorage.removeItem(LIBRARY_CACHE_KEY);
     } catch { /* ignore */ }
 
     try {

@@ -240,9 +240,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const playlistNames = input.playlistNames || {};
   const playlists: TransferPreviewPlaylistBreakdown[] = [];
 
+  const matchesByPlaylist = new Map<string, typeof matchResults>();
+  for (const r of matchResults) {
+    const list = matchesByPlaylist.get(r.playlistId) || [];
+    list.push(r);
+    matchesByPlaylist.set(r.playlistId, list);
+  }
+
   for (const [playlistId, tracks] of tracksByPlaylist) {
     const playlistTracks = input.allowDuplicates ? tracks : dedupeTracks(tracks);
-    const playlistMatches = matchResults.filter((r) => r.playlistId === playlistId);
+    const playlistMatches = matchesByPlaylist.get(playlistId) || [];
     const playlistUnmatched = playlistTracks.length - playlistMatches.length;
 
     playlists.push({

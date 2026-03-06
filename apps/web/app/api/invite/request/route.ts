@@ -62,6 +62,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     });
   } catch {
     logInviteEvent({ requestId, status: "delivery-failed" });
+    await ensureMinimumDuration(startedAt);
     return NextResponse.json({ error: "Invite service unavailable." }, { status: 503 });
   }
 

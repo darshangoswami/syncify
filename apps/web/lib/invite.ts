@@ -23,14 +23,13 @@ export function isBlockedDomain(email: string, blockedDomains: string[]): boolea
   return blockedDomains.includes(domain.toLowerCase());
 }
 
-function constantTimeEquals(left: string, right: string): boolean {
-  const leftDigest = createHash("sha256").update(left).digest();
-  const rightDigest = createHash("sha256").update(right).digest();
-
-  return timingSafeEqual(leftDigest, rightDigest);
-}
-
 export function isApprovedEmail(email: string, allowlist: string[]): boolean {
   const normalizedEmail = normalizeEmail(email);
-  return allowlist.some((approvedEmail) => constantTimeEquals(normalizedEmail, approvedEmail));
+  const leftDigest = createHash("sha256").update(normalizedEmail).digest();
+  let found = false;
+  for (const approved of allowlist) {
+    const rightDigest = createHash("sha256").update(approved).digest();
+    if (timingSafeEqual(leftDigest, rightDigest)) found = true;
+  }
+  return found;
 }

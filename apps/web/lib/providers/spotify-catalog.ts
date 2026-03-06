@@ -1,27 +1,13 @@
 import type { SourcePlaylist, SourceTrack } from "@spotify-xyz/shared";
 import type { ProviderSession } from "@/lib/provider-session";
 import { getSpotifyApiConfig } from "@/lib/env";
+import { ProviderApiError } from "@/lib/providers/errors";
+import { getAuthHeader, getString, getNumber } from "@/lib/providers/shared";
 
-class SpotifyApiError extends Error {
-  readonly status: number;
-
+class SpotifyApiError extends ProviderApiError {
   constructor(message: string, status: number) {
-    super(message);
-    this.name = "SpotifyApiError";
-    this.status = status;
+    super(message, status, "SpotifyApiError");
   }
-}
-
-function getAuthHeader(session: ProviderSession): string {
-  return `${session.tokenType || "Bearer"} ${session.accessToken}`;
-}
-
-function getString(value: unknown): string | null {
-  return typeof value === "string" && value.length > 0 ? value : null;
-}
-
-function getNumber(value: unknown): number | null {
-  return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
 function getPrimaryArtist(value: unknown): string {

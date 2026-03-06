@@ -1,66 +1,29 @@
 import type { ProviderSession } from "@/lib/provider-session";
 import { getTidalApiConfig } from "@/lib/env";
+import { ProviderApiError } from "@/lib/providers/errors";
+import { getAuthHeader, tidalFetchWithRetry } from "@/lib/providers/shared";
 
-class TidalWriteError extends Error {
-  readonly status: number;
-
+class TidalWriteError extends ProviderApiError {
   constructor(message: string, status: number) {
-    super(message);
-    this.name = "TidalWriteError";
-    this.status = status;
+    super(message, status, "TidalWriteError");
   }
 }
 
-function getAuthHeader(session: ProviderSession): string {
-  return `${session.tokenType || "Bearer"} ${session.accessToken}`;
-}
+const RETRY_OPTIONS = { throttleMs: 500, maxRetries: 4, retryBaseMs: 2000 };
 
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-const THROTTLE_MS = 500;
-const MAX_RETRIES = 4;
-const RETRY_BASE_MS = 2000;
-
-async function postWithRetry(
+function postWithRetry(
   url: string,
   session: ProviderSession,
   body: unknown
 ): Promise<Response> {
-  let response: Response | null = null;
-
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    if (attempt > 0) {
-      await delay(RETRY_BASE_MS * Math.pow(2, attempt - 1));
-    } else {
-      await delay(THROTTLE_MS);
-    }
-
-    response = await fetch(url, {
-      method: "POST",
-      headers: {
-        Authorization: getAuthHeader(session),
-        "Content-Type": "application/vnd.api+json"
-      },
-      body: JSON.stringify(body)
-    });
-
-    if (response.status !== 429) break;
-  }
-
-  if (!response) {
-    throw new TidalWriteError("TIDAL API request failed after retries.", 429);
-  }
-
-  return response;
+  return tidalFetchWithRetry(url, session, RETRY_OPTIONS, {
+    method: "POST",
+    headers: { "Content-Type": "application/vnd.api+json" },
+    body: JSON.stringify(body)
+  });
 }
 
-let cachedUserId: string | null = null;
-
 export async function getTidalUserId(session: ProviderSession): Promise<string> {
-  if (cachedUserId) return cachedUserId;
-
   const config = getTidalApiConfig();
   const response = await fetch(`${config.apiBaseUrl}/users/me`, {
     headers: { Authorization: getAuthHeader(session) }
@@ -83,8 +46,7 @@ export async function getTidalUserId(session: ProviderSession): Promise<string> 
     throw new TidalWriteError("TIDAL user ID not found.", 502);
   }
 
-  cachedUserId = String(userId);
-  return cachedUserId;
+  return String(userId);
 }
 
 export async function createTidalPlaylist(

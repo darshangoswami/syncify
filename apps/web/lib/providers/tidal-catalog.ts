@@ -2,23 +2,13 @@ import type { SourceTrack } from "@spotify-xyz/shared";
 import type { ProviderSession } from "@/lib/provider-session";
 import { getTidalApiConfig } from "@/lib/env";
 import { getTidalUserId } from "@/lib/providers/tidal-write";
+import { ProviderApiError } from "@/lib/providers/errors";
+import { getString, getNumber, tidalFetchWithRetry } from "@/lib/providers/shared";
 
-class TidalApiError extends Error {
-  readonly status: number;
-
+class TidalApiError extends ProviderApiError {
   constructor(message: string, status: number) {
-    super(message);
-    this.name = "TidalApiError";
-    this.status = status;
+    super(message, status, "TidalApiError");
   }
-}
-
-function getString(value: unknown): string | null {
-  return typeof value === "string" && value.length > 0 ? value : null;
-}
-
-function getNumber(value: unknown): number | null {
-  return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
 function parseIsoDuration(value: unknown): number {
@@ -29,14 +19,6 @@ function parseIsoDuration(value: unknown): number {
   const minutes = parseInt(match[2] || "0", 10);
   const seconds = parseFloat(match[3] || "0");
   return Math.floor((hours * 3600 + minutes * 60 + seconds) * 1000);
-}
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function getAuthHeader(session: ProviderSession): string {
-  return `${session.tokenType || "Bearer"} ${session.accessToken}`;
 }
 
 function ensureCountryParam(url: URL, countryCode: string): void {
@@ -216,35 +198,16 @@ function normalizeTrackNode(value: unknown): unknown {
   return node;
 }
 
-const THROTTLE_MS = 250;
-const MAX_RETRIES = 4;
-const RETRY_BASE_MS = 1000;
+const RETRY_OPTIONS = { throttleMs: 250, maxRetries: 4, retryBaseMs: 1000 };
 const ISRC_BATCH_SIZE = 20;
 
 async function fetchWithRetry(
   url: string,
   session: ProviderSession
 ): Promise<{ response: Response; payload: unknown }> {
-  let response: Response | null = null;
-
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-    if (attempt > 0) {
-      await delay(RETRY_BASE_MS * Math.pow(2, attempt - 1));
-    } else {
-      await delay(THROTTLE_MS);
-    }
-
-    response = await fetch(url, {
-      method: "GET",
-      headers: { Authorization: getAuthHeader(session) }
-    });
-
-    if (response.status !== 429) break;
-  }
-
-  if (!response) {
-    throw new TidalApiError("TIDAL API request failed after retries.", 429);
-  }
+  const response = await tidalFetchWithRetry(url, session, RETRY_OPTIONS, {
+    method: "GET"
+  });
 
   let payload: unknown = null;
   try {
@@ -370,7 +333,12 @@ export async function listTidalUserPlaylists(
     }
 
     return playlists;
-  } catch {
+  } catch (err) {
+    console.error(JSON.stringify({
+      at: new Date().toISOString(),
+      kind: "tidal_playlists_fetch",
+      error: err instanceof Error ? err.message : "Unknown error"
+    }));
     return [];
   }
 }

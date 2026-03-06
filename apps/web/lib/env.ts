@@ -32,7 +32,7 @@ function asScopes(value: string | undefined, fallback: string[]): string[] {
     .filter(Boolean);
 }
 
-function normalizeBaseUrl(value: string): string {
+export function normalizeBaseUrl(value: string): string {
   return value.endsWith("/") ? value.slice(0, -1) : value;
 }
 

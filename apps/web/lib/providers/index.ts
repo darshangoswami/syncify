@@ -1,5 +1,5 @@
 import type { OAuthProvider, OAuthProviderAdapter } from "@spotify-xyz/shared";
-import { getAppBaseUrl } from "@/lib/env";
+import { getAppBaseUrl, normalizeBaseUrl } from "@/lib/env";
 import { spotifyAdapter } from "@/lib/providers/spotify-adapter";
 import { tidalAdapter } from "@/lib/providers/tidal-adapter";
 
@@ -16,10 +16,6 @@ export function getOAuthProviderAdapter(provider: OAuthProvider): OAuthProviderA
   return adapters[provider];
 }
 
-function normalizeOrigin(value: string): string {
-  return value.endsWith("/") ? value.slice(0, -1) : value;
-}
-
 function normalizeOAuthOrigin(provider: OAuthProvider, origin: string): string {
   const url = new URL(origin);
 
@@ -28,7 +24,7 @@ function normalizeOAuthOrigin(provider: OAuthProvider, origin: string): string {
     url.hostname = "127.0.0.1";
   }
 
-  return normalizeOrigin(url.toString());
+  return normalizeBaseUrl(url.toString());
 }
 
 export function getOAuthCallbackUrl(provider: OAuthProvider, requestOrigin?: string): string {
