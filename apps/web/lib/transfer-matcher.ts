@@ -32,45 +32,13 @@ function hasIsrcMatch(source: SourceTrack, candidate: SourceTrack): boolean {
   return source.isrc.trim().toUpperCase() === candidate.isrc.trim().toUpperCase();
 }
 
-function titlesMatch(sourceTitle: string, candidateTitle: string): boolean {
-  const s = normalizeText(sourceTitle);
-  const c = normalizeText(candidateTitle);
-  return s === c || s.startsWith(c) || c.startsWith(s);
+function normalizedTitlesMatch(srcTitle: string, candTitle: string): boolean {
+  return srcTitle === candTitle || srcTitle.startsWith(candTitle) || candTitle.startsWith(srcTitle);
 }
 
-function hasStrictMetadataMatch(source: SourceTrack, candidate: SourceTrack): boolean {
-  return (
-    normalizeText(source.title) === normalizeText(candidate.title) &&
-    normalizePrimaryArtist(source.artist) === normalizePrimaryArtist(candidate.artist) &&
-    durationMatches(source.durationMs, candidate.durationMs)
-  );
-}
-
-function artistsMatch(sourceArtist: string, candidateArtist: string): boolean {
-  const s = normalizePrimaryArtist(sourceArtist);
-  const c = normalizePrimaryArtist(candidateArtist);
-  if (s === c) return true;
-  // Partial containment: "Rabbi Shergill" vs "Rabbi" or vice versa
-  return s.includes(c) || c.includes(s);
-}
-
-function hasRelaxedMetadataMatch(source: SourceTrack, candidate: SourceTrack): boolean {
-  return (
-    titlesMatch(source.title, candidate.title) &&
-    artistsMatch(source.artist, candidate.artist) &&
-    durationMatches(source.durationMs, candidate.durationMs)
-  );
-}
-
-function hasSearchContextMatch(source: SourceTrack, candidate: SourceTrack): boolean {
-  // When artist info is missing from the candidate (TIDAL didn't return it),
-  // accept title + duration match since the search query already included the artist name
-  const candidateArtistUnknown = normalizePrimaryArtist(candidate.artist) === "unknown artist";
-  return (
-    titlesMatch(source.title, candidate.title) &&
-    (candidateArtistUnknown || artistsMatch(source.artist, candidate.artist)) &&
-    durationMatches(source.durationMs, candidate.durationMs)
-  );
+function normalizedArtistsMatch(srcArtist: string, candArtist: string): boolean {
+  if (srcArtist === candArtist) return true;
+  return srcArtist.includes(candArtist) || candArtist.includes(srcArtist);
 }
 
 export function buildDestinationSearchQuery(track: SourceTrack): string {
@@ -81,25 +49,47 @@ export function matchTrackAgainstCandidates(
   sourceTrack: SourceTrack,
   destinationCandidates: SourceTrack[]
 ): SourceTrack | null {
+  const srcTitle = normalizeText(sourceTrack.title);
+  const srcArtist = normalizePrimaryArtist(sourceTrack.artist);
+
   // Tier 1: ISRC match (exact identifier)
   const isrcMatch = destinationCandidates.find((candidate) => hasIsrcMatch(sourceTrack, candidate));
   if (isrcMatch) {
     return isrcMatch;
   }
 
+  // Pre-compute normalized candidate values for tiers 2–4
+  const normalized = destinationCandidates.map((candidate) => ({
+    track: candidate,
+    title: normalizeText(candidate.title),
+    artist: normalizePrimaryArtist(candidate.artist)
+  }));
+
   // Tier 2: Strict metadata (exact title + exact primary artist + duration)
-  const strictMatch = destinationCandidates.find((candidate) => hasStrictMetadataMatch(sourceTrack, candidate));
+  const strictMatch = normalized.find((c) =>
+    srcTitle === c.title &&
+    srcArtist === c.artist &&
+    durationMatches(sourceTrack.durationMs, c.track.durationMs)
+  );
   if (strictMatch) {
-    return strictMatch;
+    return strictMatch.track;
   }
 
   // Tier 3: Relaxed metadata (fuzzy title + partial artist + duration)
-  const relaxedMatch = destinationCandidates.find((candidate) => hasRelaxedMetadataMatch(sourceTrack, candidate));
+  const relaxedMatch = normalized.find((c) =>
+    normalizedTitlesMatch(srcTitle, c.title) &&
+    normalizedArtistsMatch(srcArtist, c.artist) &&
+    durationMatches(sourceTrack.durationMs, c.track.durationMs)
+  );
   if (relaxedMatch) {
-    return relaxedMatch;
+    return relaxedMatch.track;
   }
 
   // Tier 4: Search-context match (title + duration, tolerates missing/unknown artist)
-  const contextMatch = destinationCandidates.find((candidate) => hasSearchContextMatch(sourceTrack, candidate));
-  return contextMatch || null;
+  const contextMatch = normalized.find((c) =>
+    normalizedTitlesMatch(srcTitle, c.title) &&
+    (c.artist === "unknown artist" || normalizedArtistsMatch(srcArtist, c.artist)) &&
+    durationMatches(sourceTrack.durationMs, c.track.durationMs)
+  );
+  return contextMatch?.track || null;
 }

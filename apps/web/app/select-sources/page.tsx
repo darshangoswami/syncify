@@ -5,12 +5,11 @@ import type { ReactElement } from "react";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { LIBRARY_CACHE_KEY } from "@/lib/constants";
 
 interface PlaylistItem extends SourcePlaylist {
   type: "liked" | "playlist";
 }
-
-const CACHE_KEY = "syncify:library";
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 interface CachedLibrary {
@@ -20,11 +19,11 @@ interface CachedLibrary {
 
 function getCachedLibrary(): PlaylistItem[] | null {
   try {
-    const raw = sessionStorage.getItem(CACHE_KEY);
+    const raw = sessionStorage.getItem(LIBRARY_CACHE_KEY);
     if (!raw) return null;
     const cached = JSON.parse(raw) as CachedLibrary;
     if (Date.now() - cached.cachedAt > CACHE_TTL_MS) {
-      sessionStorage.removeItem(CACHE_KEY);
+      sessionStorage.removeItem(LIBRARY_CACHE_KEY);
       return null;
     }
     return cached.playlists;
@@ -36,7 +35,7 @@ function getCachedLibrary(): PlaylistItem[] | null {
 function setCachedLibrary(playlists: PlaylistItem[]): void {
   try {
     const entry: CachedLibrary = { playlists, cachedAt: Date.now() };
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify(entry));
+    sessionStorage.setItem(LIBRARY_CACHE_KEY, JSON.stringify(entry));
   } catch { /* quota exceeded — ignore */ }
 }
 
@@ -133,7 +132,7 @@ export default function SelectSourcesPage(): ReactElement {
   }
 
   function refreshLibrary(): void {
-    sessionStorage.removeItem(CACHE_KEY);
+    sessionStorage.removeItem(LIBRARY_CACHE_KEY);
     setPlaylists([]);
     setSelectedIds(new Set());
     setLoading(true);
