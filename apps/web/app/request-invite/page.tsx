@@ -2,7 +2,7 @@
 
 import type { FormEvent, ReactElement } from "react";
 import { useState } from "react";
-import Link from "next/link";
+
 import { useRouter } from "next/navigation";
 
 type Status = "idle" | "submitting" | "success" | "error";
@@ -48,17 +48,7 @@ export default function RequestInvitePage(): ReactElement {
 
   return (
     <div className="min-h-dvh bg-background-dark flex flex-col relative">
-      {/* Nav */}
-      <nav className="p-6 md:p-10 absolute top-0 left-0 w-full z-10">
-        <Link
-          href="/"
-          className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-zinc-800 hover:bg-zinc-700 transition-colors"
-        >
-          <span className="material-icons-round text-white">arrow_back</span>
-        </Link>
-      </nav>
-
-      <main className="flex-grow flex flex-col lg:flex-row items-center justify-center px-6 md:px-16 lg:px-24 pt-24 pb-32 max-w-7xl mx-auto w-full z-10">
+      <main className="flex-grow flex flex-col lg:flex-row items-center justify-center px-6 md:px-16 lg:px-24 py-16 max-w-7xl mx-auto w-full z-10">
         {/* Left side — text + form */}
         <div className="w-full lg:w-1/2 pr-0 lg:pr-16 flex flex-col justify-center mb-16 lg:mb-0">
           <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-tight">

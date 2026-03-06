@@ -594,13 +594,7 @@ function TransferPageInner(): ReactElement {
     return (
       <div className="min-h-dvh bg-background-dark flex flex-col antialiased overflow-x-hidden">
         {/* Header */}
-        <header className="w-full max-w-5xl mx-auto px-6 py-8 flex items-center gap-4">
-          <Link
-            href="/select-sources"
-            className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center hover:bg-zinc-700 transition-colors"
-          >
-            <span className="material-icons-round">arrow_back</span>
-          </Link>
+        <header className="w-full max-w-5xl mx-auto px-6 py-8">
           <h1 className="text-2xl font-bold">Transfer Preview</h1>
         </header>
 
@@ -815,10 +809,7 @@ function TransferPageInner(): ReactElement {
     return (
       <div className="min-h-dvh bg-background-dark text-white flex flex-col antialiased">
         {/* Header */}
-        <header className="w-full max-w-4xl mx-auto px-6 py-8 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center opacity-50">
-            <span className="material-icons-round">arrow_back</span>
-          </div>
+        <header className="w-full max-w-4xl mx-auto px-6 py-8">
           <h1 className="text-2xl font-bold">Transfer</h1>
         </header>
 
@@ -924,12 +915,6 @@ function TransferPageInner(): ReactElement {
           {/* Header */}
           <div className="flex items-start justify-between relative">
             <div className="flex flex-col gap-4">
-              <button
-                className="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors"
-                onClick={() => router.push("/select-sources")}
-              >
-                <span className="material-icons-round text-zinc-700 dark:text-white">arrow_back</span>
-              </button>
               <div>
                 <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-2">
                   Transfer<br />
