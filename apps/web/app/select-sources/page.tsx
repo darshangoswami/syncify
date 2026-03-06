@@ -402,8 +402,7 @@ export default function SelectSourcesPage(): ReactElement {
       </main>
 
       {/* Progress bar */}
-      <div className="fixed bottom-0 left-0 right-0 h-1 flex">
-        <div className="h-full bg-zinc-800 flex-1" />
+      <div className="fixed bottom-0 left-0 right-0 h-1 flex z-50">
         <div className="h-full bg-primary flex-1 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
         <div className="h-full bg-zinc-800 flex-1" />
         <div className="h-full bg-zinc-800 flex-1" />

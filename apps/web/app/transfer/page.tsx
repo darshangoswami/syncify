@@ -783,7 +783,7 @@ function TransferPageInner(): ReactElement {
         </main>
 
         {/* Fixed bottom CTA */}
-        <div className="fixed bottom-0 left-0 w-full bg-background-dark/90 backdrop-blur-md border-t border-zinc-800 p-6 z-50">
+        <div className="fixed bottom-0 left-0 w-full bg-background-dark/90 backdrop-blur-md border-t border-zinc-800 p-6 pb-7 z-50">
           <div className="max-w-5xl mx-auto flex flex-col items-center">
             <button
               className="w-full max-w-md bg-primary hover:bg-green-500 text-black font-bold text-lg py-4 px-8 rounded-full shadow-[0_0_20px_rgba(34,197,94,0.3)] transition-all active:scale-[0.98] flex items-center justify-center gap-2"
@@ -792,12 +792,14 @@ function TransferPageInner(): ReactElement {
               START TRANSFER
               <span className="material-icons-round text-black">arrow_forward</span>
             </button>
-            <div className="flex gap-2 mt-6">
-              <div className="w-8 h-1.5 rounded-full bg-zinc-800" />
-              <div className="w-8 h-1.5 rounded-full bg-primary" />
-              <div className="w-8 h-1.5 rounded-full bg-zinc-800" />
-            </div>
           </div>
+        </div>
+
+        {/* Progress bar */}
+        <div className="fixed bottom-0 left-0 right-0 h-1 flex z-50">
+          <div className="h-full bg-zinc-800 flex-1" />
+          <div className="h-full bg-primary flex-1 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
+          <div className="h-full bg-zinc-800 flex-1" />
         </div>
       </div>
     );
@@ -1067,6 +1069,13 @@ function TransferPageInner(): ReactElement {
           >
             I&apos;m done
           </button>
+        </div>
+
+        {/* Progress bar */}
+        <div className="fixed bottom-0 left-0 right-0 h-1 flex z-50">
+          <div className="h-full bg-zinc-800 flex-1" />
+          <div className="h-full bg-zinc-800 flex-1" />
+          <div className="h-full bg-primary flex-1 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
         </div>
       </div>
     );
