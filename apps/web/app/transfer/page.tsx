@@ -594,18 +594,12 @@ function TransferPageInner(): ReactElement {
     return (
       <div className="min-h-dvh bg-background-dark flex flex-col antialiased overflow-x-hidden">
         {/* Header */}
-        <header className="w-full max-w-5xl mx-auto px-6 py-8 flex items-center gap-4">
-          <Link
-            href="/select-sources"
-            className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center hover:bg-zinc-700 transition-colors"
-          >
-            <span className="material-icons-round">arrow_back</span>
-          </Link>
+        <header className="w-full max-w-5xl mx-auto px-6 py-8">
           <h1 className="text-2xl font-bold">Transfer Preview</h1>
         </header>
 
         {/* Main */}
-        <main className="flex-grow w-full max-w-5xl mx-auto px-6 pb-44">
+        <main className="flex-grow w-full max-w-5xl mx-auto px-6 pb-12">
           {/* Hero + Sync source */}
           <div className="mb-10 flex flex-col items-center gap-6">
             {/* Hero card */}
@@ -780,11 +774,9 @@ function TransferPageInner(): ReactElement {
               )}
             </div>
           </div>
-        </main>
 
-        {/* Fixed bottom CTA */}
-        <div className="fixed bottom-0 left-0 w-full bg-background-dark/90 backdrop-blur-md border-t border-zinc-800 p-6 pb-7 z-50">
-          <div className="max-w-5xl mx-auto flex flex-col items-center">
+          {/* Start Transfer */}
+          <div className="flex justify-center mt-10">
             <button
               className="w-full max-w-md bg-primary hover:bg-green-500 text-black font-bold text-lg py-4 px-8 rounded-full shadow-[0_0_20px_rgba(34,197,94,0.3)] transition-all active:scale-[0.98] flex items-center justify-center gap-2"
               onClick={() => void startTransfer()}
@@ -793,7 +785,7 @@ function TransferPageInner(): ReactElement {
               <span className="material-icons-round text-black">arrow_forward</span>
             </button>
           </div>
-        </div>
+        </main>
 
         {/* Progress bar */}
         <div className="fixed bottom-0 left-0 right-0 h-1 flex z-50">
@@ -813,18 +805,13 @@ function TransferPageInner(): ReactElement {
     const strokeOffset = circumference - (circumference * percentComplete) / 100;
 
     return (
-      <div className="min-h-dvh bg-white dark:bg-zinc-900 text-zinc-900 dark:text-white flex flex-col antialiased">
-        <div className="max-w-3xl mx-auto w-full relative">
-          {/* Header */}
-          <header className="flex items-center p-6 border-b border-zinc-100 dark:border-zinc-800 relative z-10">
-            <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center opacity-50">
-              <span className="material-icons-round text-zinc-600 dark:text-zinc-300">arrow_back</span>
-            </div>
-            <h1 className="flex-1 text-center text-xl font-bold tracking-tight">Transfer</h1>
-            <div className="w-10 h-10" />
-          </header>
+      <div className="min-h-dvh bg-background-dark text-white flex flex-col antialiased">
+        {/* Header */}
+        <header className="w-full max-w-4xl mx-auto px-6 py-8">
+          <h1 className="text-2xl font-bold">Transfer</h1>
+        </header>
 
-          <main className="p-8 md:p-12 relative">
+        <main className="flex-grow w-full max-w-4xl mx-auto px-6 pb-12 relative">
             {/* Floating stickers - hidden on mobile */}
             <div className="absolute top-10 right-10 bg-purple-600 rounded-xl p-3 shadow-lg rotate-12 hidden md:block animate-float" style={{ animationDelay: "0.5s" }}>
               <span className="material-icons-round text-white">music_note</span>
@@ -849,7 +836,7 @@ function TransferPageInner(): ReactElement {
               <div className="relative w-64 h-64 md:w-80 md:h-80">
                 <svg className="w-full h-full" viewBox="0 0 100 100">
                   <circle
-                    className="text-zinc-200 dark:text-zinc-800"
+                    className="text-zinc-800"
                     cx="50" cy="50" r="45"
                     fill="none" stroke="currentColor" strokeWidth="8"
                   />
@@ -876,9 +863,9 @@ function TransferPageInner(): ReactElement {
             </div>
 
             {/* Now playing card */}
-            <div className="bg-zinc-50 dark:bg-zinc-950 rounded-2xl p-6 mb-8 border border-zinc-100 dark:border-zinc-800 shadow-sm flex items-center gap-6">
+            <div className="bg-zinc-800 rounded-2xl p-6 mb-8 border border-zinc-700 shadow-sm flex items-center gap-6">
               <div className="w-16 h-16 rounded-xl bg-purple-600/20 flex items-center justify-center shrink-0">
-                <span className="material-icons-round text-purple-600 text-3xl">play_arrow</span>
+                <span className="material-icons-round text-purple-400 text-3xl">play_arrow</span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-primary text-sm font-semibold mb-1">Moving now</p>
@@ -898,7 +885,7 @@ function TransferPageInner(): ReactElement {
             {/* Stop button */}
             <div className="flex flex-col items-center">
               <button
-                className="w-full md:w-auto px-8 py-4 rounded-xl bg-zinc-200 dark:bg-zinc-800 hover:bg-zinc-300 dark:hover:bg-zinc-700 text-zinc-900 dark:text-white font-semibold text-lg flex items-center justify-center gap-3 transition-colors mb-4 border border-zinc-300 dark:border-zinc-700"
+                className="w-full md:w-auto px-8 py-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-lg flex items-center justify-center gap-3 transition-colors mb-4 border border-zinc-700"
                 onClick={stopTransfer}
               >
                 <span className="w-4 h-4 rounded bg-red-500 block" />
@@ -909,7 +896,6 @@ function TransferPageInner(): ReactElement {
               </p>
             </div>
           </main>
-        </div>
       </div>
     );
   }
@@ -927,12 +913,6 @@ function TransferPageInner(): ReactElement {
           {/* Header */}
           <div className="flex items-start justify-between relative">
             <div className="flex flex-col gap-4">
-              <button
-                className="w-10 h-10 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center hover:bg-zinc-300 dark:hover:bg-zinc-700 transition-colors"
-                onClick={() => router.push("/select-sources")}
-              >
-                <span className="material-icons-round text-zinc-700 dark:text-white">arrow_back</span>
-              </button>
               <div>
                 <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-2">
                   Transfer<br />

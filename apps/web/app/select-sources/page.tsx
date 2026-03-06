@@ -189,16 +189,7 @@ export default function SelectSourcesPage(): ReactElement {
     <div className="min-h-dvh bg-background-dark flex flex-col antialiased overflow-x-hidden">
       {/* Header */}
       <header className="w-full max-w-6xl mx-auto px-6 py-8 flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <Link
-            href="/connections"
-            aria-label="Go back"
-            className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-colors"
-          >
-            <span className="material-icons-round text-xl">arrow_back</span>
-          </Link>
-          <h1 className="text-3xl font-bold tracking-tight">Select Sources</h1>
-        </div>
+        <h1 className="text-3xl font-bold tracking-tight">Select Sources</h1>
         <button
           aria-label="Refresh"
           className="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center hover:bg-zinc-700 transition-colors"
