@@ -18,7 +18,10 @@ const gochiHand = Gochi_Hand({
 
 export const metadata: Metadata = {
   title: "syncify",
-  description: "Transfer your music library between providers."
+  description: "Transfer your music library between providers.",
+  icons: {
+    icon: "/favicons/ribbon.svg"
+  }
 };
 
 export default function RootLayout({
