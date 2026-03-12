@@ -61,6 +61,11 @@ packages/shared   Shared types and interfaces
    pnpm typecheck
    ```
 
+## Roadmap
+
+- [ ] YouTube Music support
+- [ ] Two-way sync between services
+
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, coding standards, and PR guidelines.
