@@ -7,7 +7,7 @@ import type {
   TransferPreviewRequest,
   TransferPreviewResult,
   TransferPreviewResultV2
-} from "@spotify-xyz/shared";
+} from "@syncify/shared";
 import { requireApprovedEmail, requireProviderSession } from "@/lib/auth-gate";
 import { logApiEvent, logApiError } from "@/lib/logging";
 import { applyRefreshedSessionCookie } from "@/lib/provider-session";

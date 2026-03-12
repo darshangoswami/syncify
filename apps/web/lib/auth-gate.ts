@@ -1,4 +1,4 @@
-import type { OAuthProvider } from "@spotify-xyz/shared";
+import type { OAuthProvider } from "@syncify/shared";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { getApprovalCookieName, readApprovalCookieValue } from "@/lib/approval-cookie";

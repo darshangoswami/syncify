@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
-import type { InviteRequestPayload, InviteRequestResult } from "@spotify-xyz/shared";
+import type { InviteRequestPayload, InviteRequestResult } from "@syncify/shared";
 import { getBlockedDomains } from "@/lib/env";
 import { sendInviteEmail } from "@/lib/email";
 import { normalizeEmail, isBlockedDomain, isValidEmail } from "@/lib/invite";

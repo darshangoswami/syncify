@@ -7,7 +7,7 @@ import type {
   TransferPreviewPlaylistBreakdown,
   TransferPreviewResultV2,
   TransferPreviewUnmatchedTrack
-} from "@spotify-xyz/shared";
+} from "@syncify/shared";
 import type { ReactElement } from "react";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";

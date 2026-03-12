@@ -2,7 +2,7 @@ import type {
   OAuthAuthorizationRequest,
   OAuthProviderAdapter,
   OAuthTokenExchangeRequest
-} from "@spotify-xyz/shared";
+} from "@syncify/shared";
 import { getSpotifyOAuthConfig } from "@/lib/env";
 import { exchangeAuthorizationCode, exchangeRefreshToken } from "@/lib/providers/oauth-client";
 

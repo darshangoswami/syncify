@@ -17,7 +17,7 @@ importers:
 
   apps/web:
     dependencies:
-      '@spotify-xyz/shared':
+      '@syncify/shared':
         specifier: workspace:*
         version: link:../../packages/shared
       motion:

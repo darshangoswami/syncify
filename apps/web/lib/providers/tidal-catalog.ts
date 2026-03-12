@@ -1,4 +1,4 @@
-import type { SourceTrack } from "@spotify-xyz/shared";
+import type { SourceTrack } from "@syncify/shared";
 import type { ProviderSession } from "@/lib/provider-session";
 import { getTidalApiConfig } from "@/lib/env";
 import { getTidalUserId } from "@/lib/providers/tidal-write";

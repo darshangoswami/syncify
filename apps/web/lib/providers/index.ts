@@ -1,4 +1,4 @@
-import type { OAuthProvider, OAuthProviderAdapter } from "@spotify-xyz/shared";
+import type { OAuthProvider, OAuthProviderAdapter } from "@syncify/shared";
 import { getAppBaseUrl, normalizeBaseUrl } from "@/lib/env";
 import { spotifyAdapter } from "@/lib/providers/spotify-adapter";
 import { tidalAdapter } from "@/lib/providers/tidal-adapter";

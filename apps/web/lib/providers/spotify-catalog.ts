@@ -1,4 +1,4 @@
-import type { SourcePlaylist, SourceTrack } from "@spotify-xyz/shared";
+import type { SourcePlaylist, SourceTrack } from "@syncify/shared";
 import type { ProviderSession } from "@/lib/provider-session";
 import { getSpotifyApiConfig } from "@/lib/env";
 import { ProviderApiError } from "@/lib/providers/errors";

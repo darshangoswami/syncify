@@ -1,35 +1,74 @@
-# Spotify XYZ
+# syncify
 
-Monorepo for a private-beta music transfer app.
+Transfer your music library between streaming services.
 
-## Apps
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-blue)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38bdf8)](https://tailwindcss.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
-- `apps/web`: Next.js full-stack React app (TypeScript)
-- `packages/shared`: shared types/interfaces for invite and transfer surfaces
+## What it does
+
+syncify reads your playlists and liked songs from one streaming service (currently Spotify) and recreates them on another (currently TIDAL). It matches tracks by name, artist, and album, previews matches before transferring, and creates playlists on the destination service.
+
+## Features
+
+- OAuth-based login to Spotify and TIDAL
+- Reads playlists and liked songs from Spotify
+- Fuzzy track matching across services
+- Preview matched/unmatched tracks before transferring
+- Creates playlists and adds tracks on TIDAL
+- Invite-gated access with email approval flow
+- Rate limiting and abuse prevention
+
+## Project structure
+
+```
+apps/web          Next.js full-stack app (TypeScript)
+packages/shared   Shared types and interfaces
+```
 
 ## Quick start
 
-1. Use Node.js `v20.20.0`.
+1. **Node.js** `v20.20.0` is required.
+
 2. Install dependencies:
-   - `corepack enable`
-   - `corepack prepare pnpm@9.15.0 --activate`
-   - `pnpm install`
-3. Copy env file:
-   - `cp apps/web/.env.example apps/web/.env.local`
-4. Run app:
-   - `pnpm dev`
+   ```sh
+   corepack enable
+   corepack prepare pnpm@9.15.0 --activate
+   pnpm install
+   ```
+
+3. Copy the env file and fill in your credentials:
+   ```sh
+   cp apps/web/.env.example apps/web/.env.local
+   ```
+   See [`.env.example`](apps/web/.env.example) for all available variables. You'll need Spotify and TIDAL OAuth client credentials at minimum.
+
+4. Run the dev server:
+   ```sh
+   pnpm dev
+   ```
+
 5. Run tests:
-   - `pnpm test`
+   ```sh
+   pnpm test
+   ```
 
-## Invite + approval flow
+6. Type-check:
+   ```sh
+   pnpm typecheck
+   ```
 
-- Landing page has `Request Invite` and `I'm Approved` actions.
-- `POST /api/invite/request` validates email, rate-limits by IP/email, honeypot-checks, and sends an admin email.
-- `POST /api/invite/check` verifies allowlist membership from `APPROVED_EMAILS` and sets an approval cookie.
-- Protected API routes verify approval cookie before auth/transfer/source actions.
+## Contributing
 
-## Security notes
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, coding standards, and PR guidelines.
 
-- No persistent DB/Redis in v1.
-- OAuth/transfer routes are blocked until approval.
-- Invite logs are minimal (`requestId`, `status`, timestamp).
+## Security
+
+To report a vulnerability, see [SECURITY.md](SECURITY.md).
+
+## License
+
+[MIT](LICENSE)

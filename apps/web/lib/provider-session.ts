@@ -1,4 +1,4 @@
-import type { OAuthProvider, OAuthTokenSet } from "@spotify-xyz/shared";
+import type { OAuthProvider, OAuthTokenSet } from "@syncify/shared";
 import type { NextResponse } from "next/server";
 import { getOAuthSessionSecret } from "@/lib/env";
 import { getOAuthProviderAdapter } from "@/lib/providers";

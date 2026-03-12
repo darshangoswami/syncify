@@ -1,4 +1,4 @@
-import type { SourceTrack } from "@spotify-xyz/shared";
+import type { SourceTrack } from "@syncify/shared";
 
 const DURATION_TOLERANCE_MS = 10_000;
 
