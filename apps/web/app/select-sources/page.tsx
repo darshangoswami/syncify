@@ -1,6 +1,6 @@
 "use client";
 
-import type { SourcePlaylist } from "@spotify-xyz/shared";
+import type { SourcePlaylist } from "@syncify/shared";
 import type { ReactElement } from "react";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";

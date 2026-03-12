@@ -53,7 +53,14 @@ export function getApprovedEmails(): string[] {
 }
 
 export function getApprovalCookieSecret(): string {
-  return process.env.APPROVAL_COOKIE_SECRET || "local-dev-insecure-secret";
+  const secret = process.env.APPROVAL_COOKIE_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("APPROVAL_COOKIE_SECRET must be set in production");
+    }
+    return "local-dev-insecure-secret";
+  }
+  return secret;
 }
 
 export function getInviteAdminEmail(): string {
@@ -92,11 +99,25 @@ export function getAppBaseUrl(): string {
 }
 
 export function getOAuthStateSecret(): string {
-  return process.env.OAUTH_STATE_SECRET || getApprovalCookieSecret();
+  const secret = process.env.OAUTH_STATE_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("OAUTH_STATE_SECRET must be set in production");
+    }
+    return getApprovalCookieSecret();
+  }
+  return secret;
 }
 
 export function getOAuthSessionSecret(): string {
-  return process.env.OAUTH_SESSION_SECRET || getApprovalCookieSecret();
+  const secret = process.env.OAUTH_SESSION_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("OAUTH_SESSION_SECRET must be set in production");
+    }
+    return getApprovalCookieSecret();
+  }
+  return secret;
 }
 
 export interface ProviderOAuthConfig {

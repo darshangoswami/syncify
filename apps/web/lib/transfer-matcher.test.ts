@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { SourceTrack } from "@spotify-xyz/shared";
+import type { SourceTrack } from "@syncify/shared";
 import { matchTrackAgainstCandidates } from "@/lib/transfer-matcher";
 
 describe("transfer matcher", () => {

@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
-import type { InviteApprovalStatus } from "@spotify-xyz/shared";
+import type { InviteApprovalStatus } from "@syncify/shared";
 import { createApprovalCookieValue, getApprovalCookieMaxAge, getApprovalCookieName } from "@/lib/approval-cookie";
 import { getApprovalCookieSecret, getApprovedEmails } from "@/lib/env";
 import { isApprovedEmail, isValidEmail, normalizeEmail } from "@/lib/invite";

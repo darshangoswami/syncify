@@ -8,6 +8,15 @@ coverage
 .env.local
 .env.*.local
 .DS_Store
+.pnpm-store/
+
+# Editor directories
+.vscode/
+.idea/
+
+# Internal notes (local only)
+bug-fixes.md
+to-do.md
 
 output/
 ui-designs/

@@ -1,5 +1,5 @@
 import { randomBytes, timingSafeEqual } from "node:crypto";
-import type { OAuthProvider } from "@spotify-xyz/shared";
+import type { OAuthProvider } from "@syncify/shared";
 import { createSignedPayload, readSignedPayload } from "@/lib/signed-payload";
 
 const OAUTH_STATE_COOKIE_TTL_SECONDS = 60 * 10;

@@ -1,5 +1,12 @@
 {
-  "name": "spotify-xyz",
+  "name": "syncify",
+  "description": "Transfer your music library between streaming services",
+  "author": "Darshan Goswami",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/darshangoswami/syncify.git"
+  },
   "private": true,
   "packageManager": "pnpm@9.15.0",
   "engines": {

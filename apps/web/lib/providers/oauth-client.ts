@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { OAuthTokenSet } from "@spotify-xyz/shared";
+import type { OAuthTokenSet } from "@syncify/shared";
 
 const tokenResponseSchema = z.object({
   access_token: z.string().min(1),
